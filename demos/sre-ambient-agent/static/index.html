@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambient SRE Log Triage & Threat Hunting Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-wrapper">
+        <header class="app-header">
+            <div class="brand">
+                <div class="logo-icon">🛡️</div>
+                <div>
+                    <h1>AMBIENT SRE TRIAGE AGENT</h1>
+                    <span class="tagline">Event-Driven Log Monitoring • BigQuery MCP Threat Hunting • ADK 2.0</span>
+                </div>
+            </div>
+            <span class="badge badge-gcp">ADK 2.0 Webhook Agent</span>
+        </header>
+
+        <main class="grid-2col">
+            <!-- Alert Webhook Simulator -->
+            <div class="card glass-card">
+                <h2>Simulate Cloud Logging / PubSub Alert</h2>
+                <div class="form-group">
+                    <label for="severity-select">Alert Severity:</label>
+                    <select id="severity-select" class="form-control">
+                        <option value="CRITICAL" selected>CRITICAL - Database pool exhausted (504 Gateway Timeout)</option>
+                        <option value="WARNING">WARNING - High cache miss ratio on user-preference-service</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="service-input">Service Name:</label>
+                    <input type="text" id="service-input" class="form-control" value="checkout-payment-service">
+                </div>
+                <button id="btn-send-webhook" class="btn btn-primary" onclick="sendAlertWebhook()">
+                    ⚡ Push Webhook Payload to Agent
+                </button>
+            </div>
+
+            <!-- Incident Report & Triage Output -->
+            <div class="card glass-card">
+                <h2>Triage Result & BigQuery Investigation</h2>
+                <div id="triage-status" class="status-badge">Waiting for webhook trigger...</div>
+                <div id="triage-output" class="report-box">Send a webhook payload to see agent triage results...</div>
+            </div>
+        </main>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

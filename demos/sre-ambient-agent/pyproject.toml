@@ -1,0 +1,15 @@
+[project]
+name = "sre-ambient-agent"
+version = "0.1.0"
+description = "Ambient SRE Log Triage & Threat Hunting Agent built with ADK 2.0 and FastAPI"
+dependencies = [
+    "google-genai>=2.0.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "pydantic-settings>=2.2.0",
+    "pyopenssl==24.3.0",
+    "cryptography==44.0.3"
+]
+
+[tool.uv]
+index-strategy = "unsafe-best-match"

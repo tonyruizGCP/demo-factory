@@ -1,0 +1,11 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+mock_sre_logs.json
+generated_projects/
+.env
+*.egg-info/
+dist/
+build/

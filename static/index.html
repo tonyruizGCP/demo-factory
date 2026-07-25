@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Factory - Agentic Engineering & SDLC Harness Generator</title>
+    <meta name="description" content="Generate production-ready demo projects with complete GitHub/Git SDLC harnesses based on the Agentic Engineering framework.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-wrapper">
+        <!-- Top Header Bar -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="logo-icon">🏭</div>
+                <div>
+                    <h1>DEMO FACTORY</h1>
+                    <span class="tagline">Agentic Engineering • SDLC Harness Generator</span>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge badge-paper">Osmani et al., 2026 Paper</span>
+                <span class="badge badge-gcp">Google Cloud ADK 2.0</span>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs" role="tablist">
+            <button class="tab-btn active" id="tab-generator-btn" onclick="switchTab('generator')">
+                <span class="tab-icon">⚙️</span> Demo Generator
+            </button>
+            <button class="tab-btn" id="tab-runner-btn" onclick="switchTab('runner')">
+                <span class="tab-icon">🚀</span> Interactive Harness Runner
+            </button>
+
+            <button class="tab-btn" id="tab-tco-btn" onclick="switchTab('tco')">
+                <span class="tab-icon">📊</span> TCO & Economics Calculator
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- TAB 1: DEMO GENERATOR -->
+            <section id="tab-generator" class="tab-content active">
+                <div class="grid-2col">
+                    <!-- Input Configuration Form -->
+                    <div class="card glass-card">
+                        <div class="card-header">
+                            <h2>1. Specify Demo Requirements</h2>
+                            <p>Configure the customer scenario and technological architecture.</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="preset-select">Preset Use Cases (Quick Start):</label>
+                            <select id="preset-select" class="form-control" onchange="loadPreset()">
+                                <option value="">-- Select a Preset or Custom --</option>
+                                <option value="ecommerce">E-Commerce Refund & Return Assistant</option>
+                                <option value="sre">AI SRE Incident Remediation Agent</option>
+                                <option value="fintech">FinTech Compliance & AML Auditor</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="use-case-input">Customer Use Case:</label>
+                            <input type="text" id="use-case-input" class="form-control" placeholder="e.g. Healthcare Patient Intake & Triage Agent">
+                        </div>
+                        <div class="form-group">
+                            <label for="tech-approach-input">Technological Approach:</label>
+                            <input type="text" id="tech-approach-input" class="form-control" placeholder="e.g. ADK 2.0 + FastAPI + Vertex AI + OpenAPI Toolsets">
+                        </div>
+                        <div class="form-group">
+                            <label for="rigor-select">SDLC Rigor & Harness Level:</label>
+                            <select id="rigor-select" class="form-control">
+                                <option value="agentic_engineering" selected>Agentic Engineering (Full Quality Gates, Evals & CI/CD)</option>
+                                <option value="structured">Structured AI-Assisted (Manual Verification & Spot Checks)</option>
+                                <option value="vibe_coding">Vibe Coding Prototype (Disposable / Minimal Rigor)</option>
+                            </select>
+                        </div>
+                        <div class="form-group checkboxes">
+                            <label><input type="checkbox" id="chk-evals" checked> Include Evaluation Harness (LM Rubrics)</label>
+                            <label><input type="checkbox" id="chk-cicd" checked> Include GitHub Actions CI/CD Workflow</label>
+                        </div>
+                        <button id="btn-generate" class="btn btn-primary" onclick="generateDemoHarness()">
+                            ✨ Generate Demo Project & SDLC Harness
+                        </button>
+                    </div>
+
+                    <!-- Generated Project Structure & Preview -->
+                    <div class="card glass-card">
+                        <div class="card-header">
+                            <h2>2. Generated SDLC Harness Artifacts</h2>
+                            <span id="gen-status-badge" class="badge badge-idle">Ready to Generate</span>
+                        </div>
+                        <div id="gen-result-container" class="gen-result-placeholder">
+                            <div class="placeholder-icon">📦</div>
+                            <p>Fill out the parameters and click <strong>Generate Demo Project</strong> to construct the repository harness, AGENTS.md, quality gates, and FastAPI staging code.</p>
+                        </div>
+
+                        <!-- Code Preview Subtabs (Hidden until generated) -->
+                        <div id="code-preview-section" style="display: none;">
+                            <div class="subtabs">
+                                <button class="subtab-btn active" onclick="showPreviewCode('agents_md')">AGENTS.md</button>
+                                <button class="subtab-btn" onclick="showPreviewCode('ci_yml')">.github/ci.yml</button>
+                                <button class="subtab-btn" onclick="showPreviewCode('agent_py')">app/agent.py</button>
+                                <button class="subtab-btn" onclick="showPreviewCode('summary')">Harness Summary</button>
+                            </div>
+                            <pre class="code-block"><code id="code-display">// Artifact code will display here...</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: INTERACTIVE HARNESS RUNNER -->
+            <section id="tab-runner" class="tab-content">
+                <div class="grid-2col">
+                    <!-- Agent Interactive Execution -->
+                    <div class="card glass-card">
+                        <div class="card-header">
+                            <h2>Agent Execution Simulator</h2>
+                            <p>Observe the harness in action (Perceive -> Plan -> Act -> Observe -> Verify).</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="runner-usecase-select">Active Agent Scenario:</label>
+                            <select id="runner-usecase-select" class="form-control">
+                                <option value="ecommerce">E-Commerce Refund Assistant</option>
+                                <option value="sre">AI SRE Incident Remediation</option>
+                                <option value="fintech">FinTech Compliance Auditor</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="runner-prompt-input">Test User Prompt:</label>
+                            <input type="text" id="runner-prompt-input" class="form-control" value="Process return for order #US-98421 within 30-day window">
+                        </div>
+                        <button id="btn-run-sim" class="btn btn-accent" onclick="runSimulation()">
+                            ▶️ Run Agent Loop & Verify Harness
+                        </button>
+
+                        <!-- Live Agent Output -->
+                        <div class="agent-output-box">
+                            <h3>Agent Response Output:</h3>
+                            <div id="sim-response-text" class="response-text">Click "Run Agent Loop" to test...</div>
+                        </div>
+
+                        <!-- Thought Process Steps -->
+                        <div class="thought-timeline">
+                            <h3>Thought Process & Trajectory:</h3>
+                            <ul id="sim-thoughts-list" class="timeline-list">
+                                <li>Waiting for run...</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Harness Inspection & Evals -->
+                    <div class="card glass-card">
+                        <div class="card-header">
+                            <h2>Harness Verification & Quality Gate</h2>
+                            <span id="eval-gate-badge" class="badge badge-success">Quality Gate: PASSED</span>
+                        </div>
+
+                        <!-- Tool Calls Log -->
+                        <div class="tool-calls-container">
+                            <h3>Tool Calls Executed via Harness:</h3>
+                            <div id="sim-tool-calls" class="tool-list">
+                                <div class="tool-item">No tools executed yet.</div>
+                            </div>
+                        </div>
+
+                        <!-- Eval Scores Breakdown -->
+                        <div class="eval-scores-container">
+                            <h3>Evaluation Rubric & Quality Gate Scores:</h3>
+                            <div class="score-card-grid">
+                                <div class="score-card">
+                                    <span class="score-title">Final Quality</span>
+                                    <span id="score-quality" class="score-val">98%</span>
+                                </div>
+                                <div class="score-card">
+                                    <span class="score-title">Trajectory Compliance</span>
+                                    <span id="score-trajectory" class="score-val">96%</span>
+                                </div>
+                                <div class="score-card">
+                                    <span class="score-title">Safety Guardrails</span>
+                                    <span id="score-safety" class="score-val">100%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="btn-trigger-eval" class="btn btn-secondary" onclick="triggerEvalSuite()">
+                            🧪 Run Full Test & Evaluation Suite
+                        </button>
+
+                        <div id="eval-logs-container" class="eval-logs" style="display:none;">
+                            <pre><code id="eval-logs-text"></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: TCO & ECONOMICS CALCULATOR -->
+            <section id="tab-tco" class="tab-content">
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <h2>The Economics of AI Development: CapEx vs OpEx Calculator</h2>
+                        <p>Based on Figure 9 in the paper: Compare unstructured Vibe Coding vs Agentic Engineering.</p>
+                    </div>
+
+                    <div class="grid-2col">
+                        <!-- Sliders & Inputs -->
+                        <div class="tco-inputs">
+                            <div class="slider-group">
+                                <label for="slider-features">Number of Features to Build: <strong id="val-features">10</strong></label>
+                                <input type="range" id="slider-features" min="1" max="50" value="10" oninput="updateTCOCalculations()">
+                            </div>
+                            <div class="slider-group">
+                                <label for="slider-queries">Daily Agent Queries: <strong id="val-queries">500</strong></label>
+                                <input type="range" id="slider-queries" min="50" max="5000" step="50" value="500" oninput="updateTCOCalculations()">
+                            </div>
+                            <div class="slider-group">
+                                <label for="slider-tokens">Average Prompt Context Tokens: <strong id="val-tokens">15,000</strong></label>
+                                <input type="range" id="slider-tokens" min="2000" max="50000" step="1000" value="15000" oninput="updateTCOCalculations()">
+                            </div>
+                        </div>
+
+                        <!-- Results Comparison -->
+                        <div class="tco-results">
+                            <div class="tco-comparison-grid">
+                                <div class="tco-box vibe-box">
+                                    <h3>🔴 Vibe Coding</h3>
+                                    <div class="tco-stat"><span class="lbl">Upfront CapEx:</span> <strong id="tco-vibe-capex">$500</strong></div>
+                                    <div class="tco-stat"><span class="lbl">Monthly OpEx:</span> <strong id="tco-vibe-opex">$5,250</strong></div>
+                                    <div class="tco-stat"><span class="lbl">Annual Total:</span> <strong id="tco-vibe-annual">$63,500</strong></div>
+                                    <p class="tco-desc">High token burn rate due to noisy context dumping & high maintenance tax on unverified code.</p>
+                                </div>
+                                <div class="tco-box agentic-box">
+                                    <h3>🟢 Agentic Engineering</h3>
+                                    <div class="tco-stat"><span class="lbl">Upfront CapEx:</span> <strong id="tco-agentic-capex">$4,000</strong></div>
+                                    <div class="tco-stat"><span class="lbl">Monthly OpEx:</span> <strong id="tco-agentic-opex">$1,150</strong></div>
+                                    <div class="tco-stat"><span class="lbl">Annual Total:</span> <strong id="tco-agentic-annual">$17,800</strong></div>
+                                    <p class="tco-desc">Upfront investment in AGENTS.md, evals, and skills cuts OpEx by high-signal context engineering.</p>
+                                </div>
+                            </div>
+                            <div class="tco-summary-banner">
+                                <div class="banner-metric">
+                                    <span class="m-val" id="tco-crossover">0.9 Months</span>
+                                    <span class="m-lbl">ROI Crossover Point</span>
+                                </div>
+                                <div class="banner-metric">
+                                    <span class="m-val" id="tco-token-reduction">75.0%</span>
+                                    <span class="m-lbl">Token Cost Reduction</span>
+                                </div>
+                            </div>
+                            <p id="tco-explanation" class="tco-exp-text">Calculating financial metrics...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

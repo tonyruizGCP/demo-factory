@@ -1,0 +1,31 @@
+[project]
+name = "demo-factory"
+version = "0.1.0"
+description = "Agentic Demo Factory & SDLC Harness Generator based on Vibe Coding to Agentic Engineering best practices"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "google-genai>=2.0.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "pydantic>=2.6.0",
+    "tqdm>=4.66.0",
+    "nest-asyncio>=1.6.0",
+    "PyYAML>=6.0.1",
+    "pyopenssl==24.3.0",
+    "cryptography==44.0.3",
+    "jinja2>=3.1.3",
+    "python-dotenv>=1.0.1"
+]
+
+[tool.uv]
+index-strategy = "unsafe-best-match"
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

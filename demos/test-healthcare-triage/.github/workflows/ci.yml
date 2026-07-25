@@ -1,0 +1,29 @@
+name: SDLC Quality Gate - Test Healthcare Triage Assistant
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Check Reserved Environment Variables & Security
+        run: |
+          ! grep -rn "GOOGLE_CLOUD_PROJECT" app/ || echo "Warning: Use GCP_PROJECT instead of GOOGLE_CLOUD_PROJECT"
+      - name: Run Deterministic Unit Tests
+        run: |
+          pytest tests/
+      - name: Run Agent Trajectory & Rubric Evals
+        run: |
+          python3 -m app.eval_runner --min-score 0.85

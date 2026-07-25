@@ -1,0 +1,32 @@
+name: SDLC Quality Gate - Demo Factory Engine
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Security Check
+        run: |
+          ! grep -rn "GOOGLE_CLOUD_PROJECT" app/ || echo "Warning: Use GCP_PROJECT instead of GOOGLE_CLOUD_PROJECT"
+      - name: Run Pytest Engine Tests
+        run: |
+          pytest tests/
+      - name: Run Pytest SRE Agent Demo Tests
+        run: |
+          pytest demos/sre-ambient-agent/tests/
+      - name: Run Trajectory Evals
+        run: |
+          python3 -m app.eval_runner

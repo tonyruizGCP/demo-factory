@@ -1,0 +1,14 @@
+[project]
+name = "test-healthcare-triage"
+version = "0.1.0"
+description = "Demo project for Test Healthcare Triage Assistant"
+dependencies = [
+    "google-genai>=2.0.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "pyopenssl==24.3.0",
+    "cryptography==44.0.3"
+]
+
+[tool.uv]
+index-strategy = "unsafe-best-match"
