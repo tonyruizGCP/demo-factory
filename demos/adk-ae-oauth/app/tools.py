@@ -25,7 +25,6 @@ try:
 except ImportError:
     ToolContext = SessionToolContext
 
-
 try:
     from googleapiclient.discovery import build
 except ImportError:
@@ -140,7 +139,7 @@ def negotiate_creds(tool_context: ToolContext) -> Union[Credentials, dict]:
 
 
 def read_drive_file(file_id: str, tool_context: ToolContext) -> dict:
-    """Read the text content of a Google Drive file via live Google Drive API.
+    """Read the text content of a Google Drive file via live Google Drive & Slides APIs.
 
     Args:
         file_id: The Google Drive file ID to read.
@@ -171,14 +170,38 @@ def read_drive_file(file_id: str, tool_context: ToolContext) -> dict:
 
         if mime_type == "application/vnd.google-apps.document":
             content = service.files().export(fileId=file_id, mimeType="text/plain").execute()
+            text_content = content.decode("utf-8") if isinstance(content, bytes) else content
+
         elif mime_type == "application/vnd.google-apps.spreadsheet":
             content = service.files().export(fileId=file_id, mimeType="text/csv").execute()
+            text_content = content.decode("utf-8") if isinstance(content, bytes) else content
+
         elif mime_type == "application/vnd.google-apps.presentation":
-            content = service.files().export(fileId=file_id, mimeType="text/plain").execute()
+            # Extract text elements directly using Google Slides API v1
+            try:
+                slides_service = build("slides", "v1", credentials=creds)
+                presentation = slides_service.presentations().get(presentationId=file_id).execute()
+                p_title = presentation.get("title", file_name)
+                slide_lines = [f"# {p_title}\n"]
+                for i, slide in enumerate(presentation.get("slides", [])):
+                    slide_lines.append(f"## Slide {i+1}")
+                    for elem in slide.get("pageElements", []):
+                        shape = elem.get("shape", {})
+                        if "text" in shape:
+                            for text_elem in shape["text"].get("textElements", []):
+                                run = text_elem.get("textRun", {})
+                                val = run.get("content", "").strip()
+                                if val:
+                                    slide_lines.append(f"- {val}")
+                    slide_lines.append("")
+                text_content = "\n".join(slide_lines)
+            except Exception as slides_err:
+                logger.warning(f"Slides API extraction failed ({slides_err}), attempting PDF export")
+                content = service.files().export(fileId=file_id, mimeType="application/pdf").execute()
+                text_content = f"[Presentation Downloaded as PDF: {len(content)} bytes]"
         else:
             content = service.files().get_media(fileId=file_id).execute()
-
-        text_content = content.decode("utf-8") if isinstance(content, bytes) else content
+            text_content = content.decode("utf-8") if isinstance(content, bytes) else content
 
         return {
             "status": "success",
@@ -188,8 +211,15 @@ def read_drive_file(file_id: str, tool_context: ToolContext) -> dict:
         }
 
     except Exception as e:
-        logger.error(f"Error reading Drive file: {e}")
+        err_msg = getattr(e, "reason", str(e))
+        if hasattr(e, "content"):
+            try:
+                err_json = json.loads(e.content.decode("utf-8"))
+                err_msg = err_json.get("error", {}).get("message", err_msg)
+            except Exception:
+                pass
+        logger.error(f"Error reading Drive file: {err_msg}")
         return {
             "status": "error",
-            "message": f"Failed to read Google Drive file ({file_id}): {str(e)}",
+            "message": f"Failed to read Google Drive file ({file_id}): {err_msg}",
         }
