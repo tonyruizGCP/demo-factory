@@ -21,7 +21,6 @@ class QueryRequest(BaseModel):
 
 @app.post("/api/query")
 async def handle_query(req: QueryRequest):
-    # Extract file_id if present in query string or explicitly provided
     file_id = req.file_id
     if not file_id:
         match = re.search(r'([a-zA-Z0-9_-]{25,})', req.query)
@@ -53,4 +52,6 @@ def index():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    port = int(os.environ.get("DEMO_PORT", os.environ.get("PORT", "8085")))
+    print(f"🚀 Starting ADK Drive OAuth Agent on http://0.0.0.0:{port}")
+    uvicorn.run(app, host="0.0.0.0", port=port)
