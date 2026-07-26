@@ -68,6 +68,16 @@ Moving from casual **Vibe Coding** (ad-hoc natural language prompting without ve
 
 ---
 
+### Challenge 6: Enterprise Workspace OAuth & Google Slides API Gotchas
+- **The Issue**:
+  1. Drive API `export()` method (`service.files().export(mimeType="text/plain")`) works for Docs/Sheets but returns HTTP 400 when called on Google Slides (`application/vnd.google-apps.presentation`).
+  2. Tokens issued with `drive.apps.readonly` are rejected by Google Drive API (`SCOPE_NOT_PERMITTED`).
+- **Solution**:
+  - Integrated `Google Slides API v1` (`slides.v1`) to parse slide elements, text boxes, and titles into structured Markdown.
+  - Enforced `https://www.googleapis.com/auth/drive.readonly` scope requirement and formatted detailed HttpError scope diagnostic messages in the UI.
+
+---
+
 ## 📋 Best Practices & Engineering Checklist for New Demos
 
 When creating any new agentic demo project, ensure compliance with the following checklist:
@@ -76,8 +86,10 @@ When creating any new agentic demo project, ensure compliance with the following
 - [x] **ADK Naming**: Export `root_agent` or `app` in `app/agent.py`.
 - [x] **Crypto Pinning**: Pin `pyopenssl==24.3.0` and `cryptography==44.0.3` in `requirements.txt`.
 - [x] **Env Security**: Use `GCP_PROJECT` instead of reserved `GOOGLE_CLOUD_PROJECT`.
+- [x] **Workspace APIs**: Use `slides.v1` for Google Slides presentation parsing; require `drive.readonly` scope.
 - [x] **Offline Resilience**: Provide high-fidelity simulation fallbacks in `app/simulation.py`.
 - [x] **Deterministic Tests**: Include `pytest` unit tests in `tests/test_agent.py`.
 - [x] **Trajectory Evals**: Include `app/eval_runner.py` to score trajectory compliance & LM rubrics.
 - [x] **CI/CD Quality Gate**: Create `.github/workflows/ci.yml` gating PR merges on test & eval pass.
 - [x] **Git Cleanliness**: Include `.gitignore` excluding `.venv/`, `__pycache__`, and `mock_sre_logs.json`.
+
