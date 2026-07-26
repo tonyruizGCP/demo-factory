@@ -89,9 +89,14 @@ body {
     box-shadow: 0 0 8px var(--success-green);
 }
 
+.pulse-dot.warning {
+    background-color: #fbbf24;
+    box-shadow: 0 0 8px #fbbf24;
+}
+
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 360px 1fr;
+    grid-template-columns: 380px 1fr;
     gap: 1.5rem;
 }
 
@@ -114,12 +119,76 @@ body {
     font-size: 1.1rem;
     color: var(--accent-blue);
     margin-bottom: 0.5rem;
+    margin-top: 1rem;
+}
+
+.card h2:first-of-type {
+    margin-top: 0;
 }
 
 .section-desc {
     font-size: 0.85rem;
     color: var(--text-muted);
     margin-bottom: 1.2rem;
+}
+
+.token-box, .mode-box {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.token-box label, .mode-box label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 0.4rem;
+}
+
+.input-group-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+#token-input {
+    flex: 1;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    color: white;
+    font-size: 0.85rem;
+}
+
+#save-token-btn {
+    background: var(--accent-blue);
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    color: #0f172a;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.help-text {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 0.4rem;
+}
+
+#mode-select {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.5rem;
+    color: white;
+    font-size: 0.85rem;
+    font-family: inherit;
 }
 
 .stage-flow {
@@ -194,7 +263,7 @@ body {
 .chat-section {
     display: flex;
     flex-direction: column;
-    height: 600px;
+    height: 620px;
 }
 
 .chat-output {

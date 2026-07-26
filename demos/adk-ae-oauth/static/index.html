@@ -19,22 +19,41 @@
                 </div>
             </div>
             <div class="status-pill">
-                <span class="pulse-dot"></span>
-                <span id="oauth-status-text">OAuth Status: Ready (Stage 1 Cached)</span>
+                <span class="pulse-dot" id="status-dot"></span>
+                <span id="oauth-status-text">OAuth Status: Checking...</span>
             </div>
         </header>
 
         <main class="dashboard-grid">
             <section class="card control-panel">
-                <h2>⚙️ OAuth Resolution Control</h2>
-                <p class="section-desc">Experience 3-Stage OAuth 2.0 credential negotiation across Local ADK and Production Gemini Enterprise runtimes.</p>
+                <h2>⚡ Live OAuth Credentials</h2>
+                <p class="section-desc">Connect your real Google Drive account using an OAuth Access Token or Client credentials to read actual files live.</p>
 
+                <div class="token-box">
+                    <label for="token-input">Google OAuth Access Token:</label>
+                    <div class="input-group-row">
+                        <input type="password" id="token-input" placeholder="Paste Google OAuth Access Token..." />
+
+                        <button id="save-token-btn">Save</button>
+                    </div>
+                    <span class="help-text">Obtain via Google OAuth Playground or gcloud with scope <code>drive.readonly</code></span>
+                </div>
+
+                <div class="mode-box">
+                    <label>Execution Mode:</label>
+                    <select id="mode-select">
+                        <option value="live">⚡ Live Google Drive API (Real Files)</option>
+                        <option value="sim">🧪 Offline Simulation Mode (Mock Files)</option>
+                    </select>
+                </div>
+
+                <h2>⚙️ 3-Stage Negotiation Flow</h2>
                 <div class="stage-flow">
                     <div class="stage-step active">
                         <span class="step-num">Stage 1</span>
                         <div class="step-details">
-                            <strong>Cached / Injected Token</strong>
-                            <p>Checks <code>tool_context.state['temp:google-drive-auth']</code></p>
+                            <strong>Cached / Session Token</strong>
+                            <p>Checks <code>tool_context.state['google-drive-auth']</code></p>
                         </div>
                     </div>
                     <div class="stage-step">
@@ -55,11 +74,8 @@
 
                 <div class="quick-samples">
                     <h3>Quick Test Drives:</h3>
-                    <button class="sample-btn" data-query="Read Google Doc 'Q3_Strategic_AI_Architecture.gdoc' with ID 1AbCdEfGhIjKlMnOpQrStUvWxYz_12345">
-                        📄 Read Strategy Doc (ID: 1AbCdEfGh...)
-                    </button>
-                    <button class="sample-btn" data-query="Summarize CSV sheet data from Google Drive">
-                        📊 Summarize Revenue Sheet (CSV)
+                    <button class="sample-btn" data-query="Read Google Doc 'Q3_Strategic_AI_Architecture.gdoc' with ID 1AbCdEfGhIjKlMnOpQrStUvWxYz_12345" data-sim="true">
+                        📄 Read Offline Mock Strategy Doc
                     </button>
                 </div>
             </section>
@@ -68,14 +84,14 @@
                 <h2>💬 Agent Interaction Stream</h2>
                 <div id="chat-output" class="chat-output">
                     <div class="agent-msg welcome-msg">
-                        <strong>🤖 ADK OAuth Agent:</strong> Welcome! I am configured with 3-stage OAuth 2.0 credentials to securely inspect and summarize your Google Drive files. Paste a Drive link or File ID below to get started.
+                        <strong>🤖 ADK OAuth Agent:</strong> Welcome! I am connected to the 3-stage OAuth 2.0 credential engine. Paste your Google Drive File ID or sharing URL below (e.g. <code>https://drive.google.com/file/d/&lt;FILE_ID&gt;/view</code>) to read your live files.
                     </div>
                 </div>
 
                 <div class="input-container">
-                    <input type="text" id="query-input" placeholder="Ask to read a file ID or Google Drive link..." />
+                    <input type="text" id="query-input" placeholder="Enter Google Drive File ID or sharing link..." />
                     <button id="send-btn">
-                        <span>Send Query</span>
+                        <span>Read File</span>
                     </button>
                 </div>
             </section>
