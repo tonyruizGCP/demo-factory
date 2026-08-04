@@ -29,7 +29,8 @@ OmniCommerce's competitive advantage lies in bridging **Marketing Cloud**, **Com
 managed-agents-ecommerce/
 ├── app.py                                   # FastAPI Backend (REST & SSE Stream Server)
 ├── requirements.txt                         # Python Dependencies
-├── .env                                     # GCP Project & GCS Skill Bucket Config
+├── .env.example                             # Environment Variables Template
+├── .env                                     # GCP Project & GCS Skill Bucket Config (Git-ignored)
 ├── README.md                                # CE Presentation Guide & Architecture
 ├── unified_commerce_skill.md       # Remote GCS Skill Playbook Directive
 ├── managed_agents_ecommerce.ipynb  # Interactive Colab / Jupyter Notebook alternative
@@ -48,15 +49,28 @@ managed-agents-ecommerce/
 
 ## 🚀 Quickstart & Setup Guide
 
-### 1. Requirements
+### 1. Prerequisites & Requirements
 - Python 3.10+
 - Active Google Cloud credentials (`gcloud auth application-default login`) with access to project `truiz-agent-builder`.
 
-### 2. Local App Startup
+### 2. Environment Configuration
+Copy `.env.example` to create your local `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Description | Default / Example |
+| :--- | :--- | :--- |
+| `GCP_PROJECT` | Google Cloud Project ID for Vertex AI & Managed Agents API | `truiz-agent-builder` |
+| `GOOGLE_CLOUD_LOCATION` | GCP location endpoint for Managed Agents Control Plane | `global` |
+| `SKILL_GCS_BUCKET` | GCS Bucket storing remote skill playbooks & merchant datasets | `truiz-agent-builder-managed-agents` |
+
+### 3. Local App Startup
 Run the server locally using Python:
 
 ```bash
-cd /usr/local/google/home/tonyruiz/Desktop/demos/jetski/demos/managed-agents-ecommerce
+cd /usr/local/google/home/tonyruiz/Desktop/demos/jetski/demos/demo-factory/demos/managed-agents-ecommerce
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt

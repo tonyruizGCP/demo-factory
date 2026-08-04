@@ -36,3 +36,8 @@ def test_no_customer_branding_leak():
     forbidden_brand_2 = "".join(["m", "a", "r", "o", "-", "a", "i"])
     assert forbidden_brand_1 not in content.lower(), "Skill directive must not contain customer branding"
     assert forbidden_brand_2 not in content.lower(), "Skill directive must not contain legacy agent branding"
+
+def test_env_example_file_exists():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    env_example_path = os.path.join(base_dir, ".env.example")
+    assert os.path.exists(env_example_path), ".env.example file must exist"
