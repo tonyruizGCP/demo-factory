@@ -1,0 +1,42 @@
+[
+  {
+    "sku": "UB-RUN-100",
+    "name": "UltraBoost Performance Running Shoes",
+    "category": "Footwear",
+    "price": 140.00,
+    "stock_quantity": 3,
+    "colors": ["Black", "Blue", "White"],
+    "sizes": [8, 9, 10, 11],
+    "description": "High-cushion responsive running shoe designed for long-distance marathon endurance."
+  },
+  {
+    "sku": "APX-JKT-200",
+    "name": "Apex Thermal Winter Jacket",
+    "category": "Apparel",
+    "price": 220.00,
+    "stock_quantity": 25,
+    "colors": ["Navy", "Olive", "Charcoal"],
+    "sizes": ["S", "M", "L", "XL"],
+    "description": "Waterproof windbreaker fleece-lined jacket for modern outdoor winter adventures."
+  },
+  {
+    "sku": "NMD-BAG-300",
+    "name": "Nomad Leather Weekend Duffel Bag",
+    "category": "Accessories",
+    "price": 185.00,
+    "stock_quantity": 2,
+    "colors": ["Tan", "Espresso"],
+    "sizes": ["Standard"],
+    "description": "Handcrafted full-grain leather weekender duffel bag with reinforced shoulder straps."
+  },
+  {
+    "sku": "SLR-WTC-400",
+    "name": "SolarPulse Smartwatch Pro",
+    "category": "Electronics",
+    "price": 299.00,
+    "stock_quantity": 40,
+    "colors": ["Obsidian", "Titanium"],
+    "sizes": ["42mm", "46mm"],
+    "description": "Solar-charging GPS smartwatch with 14-day battery life and integrated health sensors."
+  }
+]

@@ -1,0 +1,40 @@
+[
+  {
+    "customer_id": "CUST-101",
+    "name": "Sarah Jenkins",
+    "email": "sarah.jenkins@example.com",
+    "phone": "+1-555-019-2831",
+    "erfm_segment": "VIP High-Value",
+    "recency_days": 5,
+    "frequency_orders": 14,
+    "total_monetary_spend": 3450.00,
+    "vip_tier": "Gold",
+    "abandoned_cart": {
+      "sku": "NMD-BAG-300",
+      "name": "Nomad Leather Weekend Duffel Bag",
+      "price": 185.00,
+      "color": "Tan",
+      "abandoned_at": "2026-07-20T18:30:00Z"
+    },
+    "preferred_channel": "SMS/Email"
+  },
+  {
+    "customer_id": "CUST-102",
+    "name": "Mike Ross",
+    "email": "mike.ross@example.com",
+    "phone": "+1-555-014-9922",
+    "erfm_segment": "At-Risk Churn",
+    "recency_days": 90,
+    "frequency_orders": 2,
+    "total_monetary_spend": 180.00,
+    "vip_tier": "Bronze",
+    "abandoned_cart": {
+      "sku": "APX-JKT-200",
+      "name": "Apex Thermal Winter Jacket",
+      "price": 220.00,
+      "color": "Olive",
+      "abandoned_at": "2026-07-19T14:15:00Z"
+    },
+    "preferred_channel": "Email"
+  }
+]

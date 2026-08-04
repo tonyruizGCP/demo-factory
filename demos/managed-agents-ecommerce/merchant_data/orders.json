@@ -1,0 +1,44 @@
+[
+  {
+    "order_id": "90210",
+    "customer_email": "sarah.jenkins@example.com",
+    "order_date": "2026-07-02",
+    "status": "Delayed in Transit",
+    "carrier": "FedEx",
+    "tracking_number": "TRK987654321",
+    "expected_delivery": "2026-07-10",
+    "items": [
+      {
+        "sku": "UB-RUN-100",
+        "name": "UltraBoost Performance Running Shoes",
+        "size": "10",
+        "color": "Blue",
+        "price": 140.00,
+        "quantity": 1
+      }
+    ],
+    "total_amount": 140.00,
+    "shipping_address": "742 Evergreen Terrace, Springfield, OR"
+  },
+  {
+    "order_id": "90211",
+    "customer_email": "alex.chen@example.com",
+    "order_date": "2026-07-15",
+    "status": "Delivered",
+    "carrier": "UPS",
+    "tracking_number": "TRK123456789",
+    "expected_delivery": "2026-07-18",
+    "items": [
+      {
+        "sku": "SLR-WTC-400",
+        "name": "SolarPulse Smartwatch Pro",
+        "size": "46mm",
+        "color": "Obsidian",
+        "price": 299.00,
+        "quantity": 1
+      }
+    ],
+    "total_amount": 299.00,
+    "shipping_address": "100 Market St, San Francisco, CA"
+  }
+]

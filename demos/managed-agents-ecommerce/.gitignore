@@ -1,0 +1,25 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# Environment & Credentials
+.env
+*.pem
+*.key
+*.json_creds.json
+
+# Testing & Evals
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# IDE & OS
+.DS_Store
+.idea/
+.vscode/

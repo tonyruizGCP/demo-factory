@@ -1,0 +1,12 @@
+[
+  {
+    "ticket_id": "TK-1001",
+    "customer_email": "sarah.jenkins@example.com",
+    "order_id": "90210",
+    "subject": "Package delayed beyond promised date",
+    "status": "Open",
+    "priority": "High",
+    "cloud": "Service Cloud",
+    "created_at": "2026-07-12T10:00:00Z"
+  }
+]
