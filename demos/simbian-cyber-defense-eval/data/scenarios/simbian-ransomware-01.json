@@ -1,0 +1,239 @@
+{
+  "id": "simbian-ransomware-01",
+  "title": "BlackCat / ALPHV Ransomware Outbreak",
+  "description": "Double-extortion enterprise ransomware outbreak involving privilege escalation, disabling Defender EDR, vssadmin shadow copy destruction, multi-threaded AES encryption, and ransom note staging.",
+  "attack_family": "Ransomware",
+  "difficulty": "Hard",
+  "initial_alert": "SOC Alert: Critical mass file modification rate and vssadmin.exe shadow copy deletion detected on DB-SRV-02.",
+  "tactics_present": [
+    "initial-access",
+    "execution",
+    "privilege-escalation",
+    "defense-evasion",
+    "discovery",
+    "collection",
+    "impact"
+  ],
+  "total_events": 16,
+  "ground_truth_detections": [
+    {
+      "rule_id": "SIGMA-T1078",
+      "tactic": "initial-access",
+      "technique_id": "T1078",
+      "technique_name": "Valid Accounts",
+      "matched_event_ids": [201],
+      "indicator_summary": "VPN login using compromised IT contractor account followed immediately by administrative shell access.",
+      "severity": "HIGH"
+    },
+    {
+      "rule_id": "SIGMA-T1059-003",
+      "tactic": "execution",
+      "technique_id": "T1059.003",
+      "technique_name": "Windows Command Shell",
+      "matched_event_ids": [202],
+      "indicator_summary": "Interactive cmd.exe shell spawned to coordinate extortion scripts.",
+      "severity": "MEDIUM"
+    },
+    {
+      "rule_id": "SIGMA-T1548-002",
+      "tactic": "privilege-escalation",
+      "technique_id": "T1548.002",
+      "technique_name": "Bypass User Account Control",
+      "matched_event_ids": [203],
+      "indicator_summary": "Fodhelper UAC bypass utilized to elevate process integrity to High/SYSTEM.",
+      "severity": "CRITICAL"
+    },
+    {
+      "rule_id": "SIGMA-T1562-001",
+      "tactic": "defense-evasion",
+      "technique_id": "T1562.001",
+      "technique_name": "Disable or Modify Tools",
+      "matched_event_ids": [204, 205],
+      "indicator_summary": "Set-MpPreference -DisableRealtimeMonitoring $true executed to disable AV/EDR protection.",
+      "severity": "CRITICAL"
+    },
+    {
+      "rule_id": "SIGMA-T1083",
+      "tactic": "discovery",
+      "technique_id": "T1083",
+      "technique_name": "File and Directory Discovery",
+      "matched_event_ids": [206],
+      "indicator_summary": "dir /s /b C:\\*.sql C:\\*.mdf C:\\*.bak to identify high-value database assets.",
+      "severity": "MEDIUM"
+    },
+    {
+      "rule_id": "SIGMA-T1490",
+      "tactic": "impact",
+      "technique_id": "T1490",
+      "technique_name": "Inhibit System Recovery",
+      "matched_event_ids": [208],
+      "indicator_summary": "vssadmin.exe delete shadows /all /quiet and wbadmin delete catalog executed.",
+      "severity": "CRITICAL"
+    },
+    {
+      "rule_id": "SIGMA-T1486",
+      "tactic": "impact",
+      "technique_id": "T1486",
+      "technique_name": "Data Encrypted for Impact",
+      "matched_event_ids": [210, 211],
+      "indicator_summary": "encryptor.exe spawned multiple worker threads modifying file headers with .blackcat extension.",
+      "severity": "CRITICAL"
+    }
+  ],
+  "events": [
+    {
+      "id": 201,
+      "timestamp": "2026-08-14T02:00:10Z",
+      "event_id": 4624,
+      "source": "Microsoft-Windows-Security-Auditing",
+      "host": "DB-SRV-02",
+      "user": "CORP\\svc_backup_admin",
+      "process_name": "svchost.exe",
+      "command_line": "svchost.exe -k netsvcs -p -s TermService",
+      "ip_address": "203.0.113.88",
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1078"
+    },
+    {
+      "id": 202,
+      "timestamp": "2026-08-14T02:01:25Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DB-SRV-02",
+      "user": "CORP\\svc_backup_admin",
+      "process_name": "cmd.exe",
+      "command_line": "C:\\Windows\\system32\\cmd.exe",
+      "parent_process": "svchost.exe",
+      "process_id": 3410,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1059-003"
+    },
+    {
+      "id": 203,
+      "timestamp": "2026-08-14T02:02:10Z",
+      "event_id": 13,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DB-SRV-02",
+      "user": "CORP\\svc_backup_admin",
+      "process_name": "fodhelper.exe",
+      "command_line": "C:\\Windows\\system32\\fodhelper.exe",
+      "registry_path": "HKCU\\Software\\Classes\\ms-settings\\Shell\\Open\\command",
+      "details": {
+        "DelegateExecute": "",
+        "Default": "cmd.exe /c start cmd.exe"
+      },
+      "process_id": 3980,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1548-002"
+    },
+    {
+      "id": 204,
+      "timestamp": "2026-08-14T02:03:00Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DB-SRV-02",
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process_name": "powershell.exe",
+      "command_line": "powershell.exe -Command \"Set-MpPreference -DisableRealtimeMonitoring $true -DisableBehaviorMonitoring $true\"",
+      "parent_process": "cmd.exe",
+      "process_id": 4200,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1562-001"
+    },
+    {
+      "id": 205,
+      "timestamp": "2026-08-14T02:03:15Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DB-SRV-02",
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process_name": "sc.exe",
+      "command_line": "sc.exe config WinDefend start= disabled",
+      "parent_process": "cmd.exe",
+      "process_id": 4250,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1562-001"
+    },
+    {
+      "id": 206,
+      "timestamp": "2026-08-14T02:04:30Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DB-SRV-02",
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process_name": "cmd.exe",
+      "command_line": "cmd.exe /c dir /s /b D:\\DatabaseFiles\\*.mdf D:\\DatabaseFiles\\*.bak > C:\\Users\\Public\\targets.txt",
+      "parent_process": "cmd.exe",
+      "process_id": 4500,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1083"
+    },
+    {
+      "id": 207,
+      "timestamp": "2026-08-14T02:05:00Z",
+      "event_id": 11,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DB-SRV-02",
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process_name": "cmd.exe",
+      "file_path": "C:\\Users\\Public\\targets.txt",
+      "process_id": 4500,
+      "is_malicious": true
+    },
+    {
+      "id": 208,
+      "timestamp": "2026-08-14T02:06:12Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DB-SRV-02",
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process_name": "vssadmin.exe",
+      "command_line": "vssadmin.exe delete shadows /all /quiet",
+      "parent_process": "cmd.exe",
+      "process_id": 4900,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1490"
+    },
+    {
+      "id": 209,
+      "timestamp": "2026-08-14T02:06:30Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DB-SRV-02",
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process_name": "wbadmin.exe",
+      "command_line": "wbadmin delete catalog -quiet",
+      "parent_process": "cmd.exe",
+      "process_id": 4950,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1490"
+    },
+    {
+      "id": 210,
+      "timestamp": "2026-08-14T02:07:00Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DB-SRV-02",
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process_name": "encryptor.exe",
+      "command_line": "C:\\Users\\Public\\encryptor.exe --path D:\\DatabaseFiles --ext .blackcat --threads 16",
+      "parent_process": "cmd.exe",
+      "process_id": 5200,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1486"
+    },
+    {
+      "id": 211,
+      "timestamp": "2026-08-14T02:07:45Z",
+      "event_id": 11,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DB-SRV-02",
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process_name": "encryptor.exe",
+      "file_path": "D:\\DatabaseFiles\\RECOVER-BLACKCAT-NOTES.txt",
+      "process_id": 5200,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1486"
+    }
+  ]
+}

