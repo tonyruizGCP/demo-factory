@@ -42,7 +42,20 @@ class HarborVerifier:
         model_name: str = "gemini-3.7-flash",
         thinking_budget: int = 2048,
     ) -> EvaluationMetricResult:
-        """Score agent detections against scenario ground truth."""
+        """Score agent detections against scenario ground truth and compute Simbian benchmark metrics.
+
+        Args:
+            scenario (ScenarioTask): BenchHub scenario metadata and ground-truth Sigma detections.
+            agent_detections (List[AgentDetection]): The detections submitted by the evaluated agent.
+            total_queries (int, optional): Total count of investigative SQL queries executed. Defaults to 1.
+            agent_name (str, optional): Identifier of the agent harness. Defaults to "Unknown Agent".
+            model_name (str, optional): Model evaluated. Defaults to "gemini-3.7-flash".
+            thinking_budget (int, optional): Reasoning budget used. Defaults to 2048.
+
+        Returns:
+            EvaluationMetricResult: Comprehensive scorecard containing overall recall, precision, F1, FDR,
+                per-tactic recall breakdowns, and Simbian pass/fail determination.
+        """
         ground_truth = scenario.ground_truth_detections
 
         # Map ground truth by technique_id and tactic

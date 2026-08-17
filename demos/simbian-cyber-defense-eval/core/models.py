@@ -91,7 +91,7 @@ class HuntStep(BaseModel):
     sql_query: Optional[str] = Field(default=None, description="SQL query executed against telemetry DB")
     tool_output: Optional[str] = Field(default=None, description="Output or table result returned by the environment")
     new_findings: List[AgentDetection] = Field(default_factory=list, description="Detections discovered in this step")
-    duration_ms: int = Field(default=0, description="Step duration in milliseconds")
+    duration_ms: float = Field(default=0.0, description="Step duration in milliseconds")
 
 
 class AgentTrajectory(BaseModel):

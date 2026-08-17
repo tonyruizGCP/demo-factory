@@ -33,7 +33,14 @@ class HarborSandbox:
         self._audit_trail: List[Dict[str, Any]] = []
 
     def start(self, events: List[LogEvent]) -> None:
-        """Initialize the sandbox environment and mount the telemetry database."""
+        """Initialize the sandbox environment and mount the telemetry database.
+
+        Args:
+            events (List[LogEvent]): Structured security log records to populate into the SQLite database.
+
+        Returns:
+            None
+        """
         self.start_time = time.time()
         self.is_running = True
         self._log(f"[Harbor Sandbox] Initializing sandbox in mode: {self.config.sandbox_mode}")
@@ -45,7 +52,19 @@ class HarborSandbox:
         self._log(f"[Harbor Sandbox] Mounted read-only telemetry dataset ({loaded} log events)")
 
     def execute_sql(self, query: str, max_rows: int = 50) -> Tuple[List[str], List[List[Any]], float, Optional[str]]:
-        """Execute a query within the sandbox constraints."""
+        """Execute a query within the sandbox constraints and audit telemetry.
+
+        Args:
+            query (str): The SQL statement to run against the mounted telemetry database.
+            max_rows (int, optional): The maximum number of rows to retrieve. Defaults to 50.
+
+        Returns:
+            Tuple[List[str], List[List[Any]], float, Optional[str]]: A 4-tuple containing:
+                - List of column names.
+                - List of row records.
+                - Execution latency in milliseconds.
+                - Error string if execution timed out, violated policy, or encountered syntax errors.
+        """
         if not self.is_running:
             return [], [], 0.0, "Sandbox is not currently active."
 
@@ -75,7 +94,11 @@ class HarborSandbox:
         return cols, rows, dur_ms, err
 
     def terminate(self) -> HarborTrialJob:
-        """Tear down the sandbox and compile final trial job metadata."""
+        """Tear down the sandbox, close database handles, and compile trial job metadata.
+
+        Returns:
+            HarborTrialJob: Structured audit manifest of the completed sandbox session.
+        """
         self.is_running = False
         duration = (time.time() - (self.start_time or time.time()))
         self._log(f"[Harbor Sandbox] Sandbox session terminated. Active duration: {duration:.2f}s")

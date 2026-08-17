@@ -1,0 +1,46 @@
+name: CI Test & Evaluation Suite
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Run Unit Tests & Benchmark Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Pytest Unit Tests
+        run: |
+          pytest tests/ -v --junitxml=test-results.xml
+
+      - name: Verify Skills Registry & CLI Listing
+        run: |
+          python3 cli.py list-skills
+          python3 cli.py list-scenarios
+          python3 cli.py list-slices
+
+      - name: Run Benchmark Evaluation (Offline Verification Mode)
+        run: |
+          python3 cli.py run-eval --scenario simbian-apt29-01 --harness antigravity --output eval_ci_report.md
+          python3 cli.py run-eval --scenario simbian-ransomware-01 --harness opencode
+
+      - name: Verify Comparative Evaluation
+        run: |
+          python3 cli.py compare-harnesses --scenario simbian-apt29-01

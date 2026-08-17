@@ -95,7 +95,14 @@ class TelemetryDatabase:
         self.conn.commit()
 
     def load_events(self, events: List[LogEvent]) -> int:
-        """Bulk load log events into the telemetry database."""
+        """Bulk load log events into the telemetry database.
+
+        Args:
+            events (List[LogEvent]): A list of structured LogEvent objects to insert.
+
+        Returns:
+            int: The total number of events successfully inserted into the database.
+        """
         cursor = self.conn.cursor()
         rows = [
             (
@@ -139,17 +146,30 @@ class TelemetryDatabase:
     def execute_query(
         self, query: str, max_rows: int = 50, timeout_sec: float = 10.0
     ) -> Tuple[List[str], List[List[Any]], float, Optional[str]]:
-        """Execute a SQL query safely and return (columns, rows, execution_time_ms, error)."""
+        """Execute a read-only SQL query safely against sandbox telemetry tables.
+
+        Args:
+            query (str): The raw SQLite query string formulated by the agent.
+            max_rows (int, optional): Maximum number of rows to return. Defaults to 50.
+            timeout_sec (float, optional): Maximum execution time in seconds. Defaults to 10.0.
+
+        Returns:
+            Tuple[List[str], List[List[Any]], float, Optional[str]]: A 4-tuple containing:
+                - List of column names (headers).
+                - List of row records.
+                - Execution duration in milliseconds.
+                - Error string if execution failed or was rejected, else None.
+        """
         start_time = time.perf_counter()
         clean_query = query.strip().rstrip(";")
 
-        # Safety sanity check: Threat hunting evaluations are read-only
+        # Safety sanity check: Threat hunting evaluations are strictly read-only
         forbidden_keywords = ["DROP ", "DELETE ", "UPDATE ", "INSERT ", "ALTER ", "ATTACH ", "DETACH "]
         upper_q = clean_query.upper()
         for kw in forbidden_keywords:
             if upper_q.startswith(kw) or f" {kw}" in upper_q:
                 duration = (time.perf_counter() - start_time) * 1000
-                err_msg = f"Security Violation: Query contains forbidden modification keyword '{kw.strip()}'."
+                err_msg = f"Security Violation: Query contains forbidden modification keyword '{kw.strip()}'. Only SELECT queries are permitted."
                 self.query_history.append({"query": query, "success": False, "error": err_msg, "duration_ms": duration})
                 return [], [], duration, err_msg
 
@@ -171,12 +191,16 @@ class TelemetryDatabase:
 
         except Exception as e:
             duration = (time.perf_counter() - start_time) * 1000
-            err_msg = str(e)
+            err_msg = f"SQLite Execution Error: {e}. Hint: Verify table names ('events', 'process_creation', 'network_connections') and use case-insensitive LIKE operators."
             self.query_history.append({"query": query, "success": False, "error": err_msg, "duration_ms": duration})
             return [], [], duration, err_msg
 
     def get_schema_summary(self) -> str:
-        """Return a markdown schema summary for the agent system prompt."""
+        """Return a markdown schema summary for injection into the agent system prompt.
+
+        Returns:
+            str: Markdown documentation of available tables, views, columns, and sample queries.
+        """
         return """
 ### Available Telemetry Tables and Views:
 

@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 
 def load_env_file(env_path: Optional[Path] = None) -> None:
@@ -57,7 +57,6 @@ class GeminiClient:
 
     def _init_sdk(self) -> None:
         """Initialize Google Gen AI client if libraries and credentials are available."""
-        # Only initialize client if explicit credentials exist to avoid uninitialized client async cleanup errors
         if not self.api_key and not self.project_id:
             self._genai_client = None
             return
@@ -74,22 +73,35 @@ class GeminiClient:
                     project=self.project_id,
                     location=self.location,
                 )
-        except Exception as e:
-            # Will fallback gracefully to simulation mode
+        except Exception:
             self._genai_client = None
 
     def is_live_available(self) -> bool:
         """Return True if live Gemini API connection is available."""
+        if not self._genai_client:
+            self._init_sdk()
         return self._genai_client is not None
 
-    def generate_hunting_step(
+    def generate_response(
         self,
-        system_instruction: str,
+        system_prompt: str,
         conversation_history: List[Dict[str, str]],
+        model_name: Optional[str] = None,
         thinking_budget: int = 2048,
         temperature: float = 0.2,
-    ) -> Dict[str, Any]:
-        """Generate the next hunting reasoning step and action."""
+    ) -> Tuple[str, int, int]:
+        """Generate response from Gemini model with extended reasoning capabilities.
+
+        Args:
+            system_prompt (str): System instruction and agent constitution.
+            conversation_history (List[Dict[str, str]]): List of message turns with 'role' and 'content'.
+            model_name (Optional[str], optional): Target Gemini model. Defaults to self.model_name.
+            thinking_budget (int, optional): Thinking token budget for reasoning. Defaults to 2048.
+            temperature (float, optional): Generation temperature. Defaults to 0.2.
+
+        Returns:
+            Tuple[str, int, int]: (response_text, input_tokens, output_tokens)
+        """
         if not self._genai_client:
             self._init_sdk()
 
@@ -100,7 +112,6 @@ class GeminiClient:
 
         from google.genai import types
 
-        # Build contents from history
         contents = []
         for msg in conversation_history:
             role = "user" if msg["role"] in ("user", "system") else "model"
@@ -109,9 +120,10 @@ class GeminiClient:
                 parts=[types.Part.from_text(text=msg["content"])]
             ))
 
-        # Configure thinking parameters for Gemini 3.7 Flash
+        target_model = model_name or self.model_name
+
         config = types.GenerateContentConfig(
-            system_instruction=system_instruction,
+            system_instruction=system_prompt,
             temperature=temperature,
             thinking_config=types.ThinkingConfig(
                 thinking_budget=thinking_budget,
@@ -119,20 +131,18 @@ class GeminiClient:
             response_mime_type="application/json",
         )
 
-        # Try requested model, with automatic fallback to gemini-2.5-flash if not available
-        target_models = [self.model_name]
-        if self.model_name != "gemini-2.5-flash":
-            target_models.append("gemini-2.5-flash")
+        candidate_models = [target_model]
+        if target_model != "gemini-2.5-flash":
+            candidate_models.append("gemini-2.5-flash")
 
         response = None
         last_err = None
-        for m in target_models:
+        for m in candidate_models:
             try:
-                # If model is 2.5-flash, omit thinking_config if unsupported
                 model_config = config
                 if "2.5" in m or "1.5" in m:
                     model_config = types.GenerateContentConfig(
-                        system_instruction=system_instruction,
+                        system_instruction=system_prompt,
                         temperature=temperature,
                         response_mime_type="application/json",
                     )
@@ -142,7 +152,6 @@ class GeminiClient:
                     contents=contents,
                     config=model_config,
                 )
-                self.model_name = m
                 break
             except Exception as e:
                 last_err = e
@@ -152,15 +161,25 @@ class GeminiClient:
             raise last_err or RuntimeError("Failed to generate content with Gemini models.")
 
         raw_text = response.text or ""
-        # Extract thoughts if present in response candidates
-        thought_text = ""
-        try:
-            for candidate in response.candidates:
-                for part in candidate.content.parts:
-                    if getattr(part, "thought", False):
-                        thought_text += part.text + "\n"
-        except Exception:
-            pass
+        in_tokens = getattr(response.usage_metadata, "prompt_token_count", len(str(contents)) // 4) or 0
+        out_tokens = getattr(response.usage_metadata, "candidates_token_count", len(raw_text) // 4) or 0
+
+        return raw_text, in_tokens, out_tokens
+
+    def generate_hunting_step(
+        self,
+        system_instruction: str,
+        conversation_history: List[Dict[str, str]],
+        thinking_budget: int = 2048,
+        temperature: float = 0.2,
+    ) -> Dict[str, Any]:
+        """Generate the next hunting reasoning step and action."""
+        raw_text, _, _ = self.generate_response(
+            system_prompt=system_instruction,
+            conversation_history=conversation_history,
+            thinking_budget=thinking_budget,
+            temperature=temperature,
+        )
 
         try:
             parsed_json = json.loads(raw_text)
@@ -168,7 +187,7 @@ class GeminiClient:
             parsed_json = {"raw_output": raw_text}
 
         return {
-            "thought": thought_text or parsed_json.get("thought", ""),
+            "thought": parsed_json.get("thought", ""),
             "action_type": parsed_json.get("action_type", "sql_query"),
             "sql_query": parsed_json.get("sql_query"),
             "findings": parsed_json.get("findings", []),
