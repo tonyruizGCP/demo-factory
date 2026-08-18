@@ -136,6 +136,130 @@ This project is built directly to satisfy the **5 Days in AI Challenge / AgentOp
 
 ---
 
+## 🔍 Core Component Deep Dives
+
+### 🛡️ 1. Why Harbor is a Critical Framework (`harbor/`)
+Harbor acts as the **isolated container and execution boundary engine**. In autonomous threat hunting, running LLM-generated SQL queries on uncontrolled infrastructure risks resource starvation and non-deterministic behavior.
+
+* **Strict Egress Boundary Enforcement**: Harbor sets `network_egress = False`. When agents analyze high-severity malware or C2 IP beacons (Cobalt Strike, ALPHV), Harbor guarantees zero external network calls can escape the sandbox.
+* **Deterministic Telemetry Mounting**: Each scenario's raw log events are mounted into an isolated, in-memory relational SQLite engine (`core/telemetry_db.py`) populated fresh per evaluation run.
+* **Execution Guardrails & Resource Bounding**: The sandbox enforces hard CPU/memory limits (`memory_limit_mb: 2048`) and execution timeouts (`timeout_seconds: 300`), intercepting infinite loops.
+* **Read-Only Safety Enforcement**: The sandbox intercepts and blocks mutating SQL keywords (`DROP`, `DELETE`, `UPDATE`, `INSERT`, `ATTACH`), returning syntax guidance back to the LLM.
+* **Ground-Truth Verification (`harbor/verifier.py`)**: Harbor compares the agent's submitted indicators against scenario ground-truth Sigma rules and computes the official **Simbian Pass Bar** ($\ge 50\%$ recall on every single present tactic).
+
+---
+
+### 📦 2. How BenchHub Assists & Plays a Role (`benchhub/`)
+BenchHub is the **dataset curation, slicing, and metadata registry layer**. Real enterprise telemetry datasets are massive; evaluating an agent across every event simultaneously leads to context bloat and cost explosion.
+
+* **Dynamic Dataset Slicing (`benchhub/schema.py`)**: Slices datasets into targeted sub-evaluations:
+  * `all-tactics`: Full 12-tactic multi-stage APT intrusion.
+  * `initial-access-only`: Slices telemetry to initial weaponization and execution events.
+  * `lolbins-evasion`: Evaluates agent ability to detect `certutil.exe`, `rundll32.exe`, and `vssadmin.exe` evasion.
+* **Difficulty & Family Taxonomy**: Classifies scenarios across attack campaigns (`APT29`, `Ransomware`, `Cloud-IAM`) and difficulty tiers (`Easy`, `Medium`, `Hard`, `APT-MultiStage`).
+* **Decoupled Data Architecture**: Decouples scenario authoring from harness logic—allowing new threat campaigns to be added as JSON files without modifying evaluation code.
+
+---
+
+### 📡 3. Observability, Tracing & Safety Stack (`core/`)
+* **`core/logger.py`**: Structured JSON logging capturing `trace_id`, `span_id`, `agent_role`, `step_index`, `intent`, and `outcome`.
+* **`core/tracing.py`**: OpenTelemetry distributed tracing spans measuring turn, query, and synthesis latency.
+* **`core/pii_scrubber.py`**: Regex pipeline redacting API keys (`AIza...`), Bearer tokens, emails, and credentials.
+* **`core/model_router.py`**: Routes fast triage to Flash (1,024 budget), reasoning to 3.7 Flash (2,048 budget), and synthesis to Pro (4,096 budget).
+* **`core/human_in_the_loop.py`**: Safety gate requiring operator approval before host isolation or patch deployment.
+
+---
+
+## 🛠️ Extensibility & Onboarding Playbooks
+
+### 🤖 1. Onboarding a New Agentic Harness (e.g., Google ADK Agent)
+
+To benchmark a new Google Agent Development Kit (ADK) agent or custom agent harness:
+
+1. **Subclass `BaseAgentHarness`** in `harnesses/adk_harness.py`:
+   ```python
+   from harnesses.base import BaseAgentHarness
+   from core.models import AgentTrajectory, HuntStep, ScenarioTask
+   from harbor.sandbox import HarborSandbox
+
+   class ADKAgentHarness(BaseAgentHarness):
+       def __init__(self, model_name="gemini-3.7-flash", thinking_budget=2048):
+           super().__init__(name="Google ADK Agent", model_name=model_name, thinking_budget=thinking_budget)
+
+       def run_investigation(self, scenario: ScenarioTask, sandbox: HarborSandbox, use_live_llm=False) -> AgentTrajectory:
+           # 1. Expose sandbox.execute_sql as an ADK tool
+           # 2. Run multi-turn investigation loop
+           # 3. Return structured AgentTrajectory
+           pass
+   ```
+2. **Register the harness** in `evaluation/evaluator.py` under `get_harness()`:
+   ```python
+   if "adk" in normalized:
+       from harnesses.adk_harness import ADKAgentHarness
+       return ADKAgentHarness(model_name=model_name, thinking_budget=thinking_budget)
+   ```
+3. **Execute evaluation**:
+   ```bash
+   python3 cli.py run-eval --scenario simbian-apt29-01 --harness adk --live
+   ```
+
+---
+
+### 📜 2. Onboarding New Specialist Skills (`skills/`)
+
+1. **Create a new skill folder** under `skills/<skill_name>/SKILL.md`:
+   ```markdown
+   ---
+   name: YARA Rule Generator & Memory Hunter
+   description: Analyzes injected process memory and extracted payloads to formulate targeted YARA rules.
+   role: YARA & Memory Specialist
+   weight: 1.1
+   ---
+   # YARA Rule Generator & Memory Specialist
+   ## 🎯 Purpose & Scope
+   Formulate YARA string signatures for EDR memory scanning when DLL injection is detected.
+   ```
+2. **Automatic Discovery**: `SkillsRegistry` automatically discovers the skill, parses frontmatter parameters (`name`, `role`, `weight`), ranks it, and injects it into Gemini 3.7 Flash system prompts.
+3. **Verify registration**:
+   ```bash
+   python3 cli.py list-skills
+   ```
+
+---
+
+### 📂 3. Onboarding New Benchmark Datasets (`data/scenarios/`)
+
+1. **Create a scenario JSON file** in `data/scenarios/<scenario_id>.json` following `ScenarioTask`:
+   ```json
+   {
+     "id": "simbian-kerberoast-01",
+     "title": "Active Directory Kerberoasting & SPN Ticket Request",
+     "attack_family": "Kerberoasting",
+     "difficulty": "Medium",
+     "initial_alert": "Anomalous volume of Kerberos TGS requests (Event 4769) from HOST-DEV-04.",
+     "tactics_present": ["credential-access", "discovery"],
+     "ground_truth_detections": [
+       {
+         "rule_id": "SIGMA-T1558-003",
+         "tactic": "credential-access",
+         "technique_id": "T1558.003",
+         "technique_name": "Steal or Forge Kerberos Tickets: Kerberoasting",
+         "matched_event_ids": [301, 302],
+         "indicator_summary": "PowerShell requested SPN tickets using Set-SPN or Get-DomainSPNTicket."
+       }
+     ],
+     "events": [ ... ]
+   }
+   ```
+2. **BenchHub automatically indexes** the scenario in `benchhub/registry.py`.
+3. **Verify and evaluate**:
+   ```bash
+   python3 cli.py list-scenarios
+   python3 cli.py run-eval --scenario simbian-kerberoast-01 --harness antigravity --live
+   ```
+
+---
+
 ## 📂 Repository Structure
 
 ```
