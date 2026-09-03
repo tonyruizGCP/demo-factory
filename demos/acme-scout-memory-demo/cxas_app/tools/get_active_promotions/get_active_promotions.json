@@ -1,0 +1,9 @@
+{
+  "name": "b9c1b3c4-442d-47be-95d6-e2d9efca6427",
+  "displayName": "get_active_promotions",
+  "pythonFunction": {
+    "name": "get_active_promotions",
+    "pythonCode": "tools/get_active_promotions/python_function/python_code.py",
+    "description": "Fetches current enterprise promotional codes for a specific Acme division or partner.\n\nArgs:\n    retailer_name (str): The name of the division (e.g., \"Acme Cloud Systems\", \"Acme Hardware Labs\", \"Acme Industrial\").\n\nReturns:\n    dict[str, Any]: A dictionary containing active corporate offers and verification status."
+  }
+}

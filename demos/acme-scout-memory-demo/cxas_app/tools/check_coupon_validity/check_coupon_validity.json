@@ -1,0 +1,9 @@
+{
+  "name": "ea9a28a1-529b-46e1-8885-cf8e5084fecd",
+  "displayName": "check_coupon_validity",
+  "pythonFunction": {
+    "name": "check_coupon_validity",
+    "pythonCode": "tools/check_coupon_validity/python_function/python_code.py",
+    "description": "Confirms if a specific corporate discount code is active and valid on the Acme portal.\n\nArgs:\n    coupon_code (str): The promo code to verify (e.g., \"ACMECLOUD25\", \"EDGESAVE\").\n    site_url (str): The URL of the Acme site/portal.\n\nReturns:\n    dict[str, Any]: A dictionary indicating validity status, terms, and AcmeGreen sustainability status."
+  }
+}

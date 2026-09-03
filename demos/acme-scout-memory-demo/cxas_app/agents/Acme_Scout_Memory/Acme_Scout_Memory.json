@@ -1,0 +1,16 @@
+{
+  "name": "Acme_Scout_Memory",
+  "displayName": "Acme_Scout_Memory",
+  "instruction": "agents/Acme_Scout_Memory/instruction.txt",
+  "tools": [
+    "check_coupon_validity",
+    "find_product_deals",
+    "get_active_promotions",
+    "end_session"
+  ],
+  "toolsets": [
+    {
+      "toolset": "vertex_memory_tool"
+    }
+  ]
+}

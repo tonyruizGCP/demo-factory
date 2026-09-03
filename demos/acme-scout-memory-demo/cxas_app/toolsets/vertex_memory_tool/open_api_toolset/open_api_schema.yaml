@@ -1,0 +1,41 @@
+openapi: 3.0.0
+info:
+  title: Vertex Memory Tool
+  version: 1.0.0
+  description: Manages long-term user context and preferences for Acme Corp.
+servers:
+  - url: "https://cxas-memory-bridge-837107868437.us-central1.run.app"
+paths:
+  /:
+    post:
+      operationId: handle_memory
+      summary: Retrieve or store user facts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [retrieve, persist]
+                  description: Use 'retrieve' to fetch history or 'persist' to save a fact.
+                user_id:
+                  type: string
+                  description: The unique ID for the user or enterprise account.
+                fact:
+                  type: string
+                  description: The information or infrastructure preference to remember for persist actions.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  memory_context:
+                    type: string
+                  status:
+                    type: string

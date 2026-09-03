@@ -1,0 +1,11 @@
+{
+  "name": "vertex_memory_tool",
+  "displayName": "vertex_memory_tool",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/vertex_memory_tool/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAgentIdTokenAuthConfig": {}
+    }
+  },
+  "description": "Manages long-term user context and preferences via the Vertex Memory Bridge Cloud Run service."
+}

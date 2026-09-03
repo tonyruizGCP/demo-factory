@@ -1,0 +1,39 @@
+{
+  "name": "",
+  "displayName": "acme_scout_memory_demo",
+  "description": "An intelligent, stateful Acme Corp Procurement & Solutions Scout agent enabled with Vertex AI Long-Term Memory capability.",
+  "rootAgent": "Acme_Scout_Memory",
+  "loggingSettings": {
+    "conversationLoggingSettings": {
+      "retentionWindow": "31536000s"
+    }
+  },
+  "modelSettings": {
+    "model": "gemini-2.5-flash"
+  },
+  "variableDeclarations": [
+    {
+      "name": "user_id",
+      "description": "The unique identifier for the user (e.g. employee email, username, or account ID).",
+      "schema": {
+        "type": "STRING",
+        "default": ""
+      }
+    },
+    {
+      "name": "memory_context",
+      "description": "The long-term memory context retrieved for the user from Vertex AI Memory Bank.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
+      }
+    }
+  ],
+  "languageSettings": {
+    "defaultLanguageCode": "en-US"
+  },
+  "timeZoneSettings": {
+    "timeZone": "America/New_York"
+  },
+  "toolExecutionMode": "PARALLEL"
+}

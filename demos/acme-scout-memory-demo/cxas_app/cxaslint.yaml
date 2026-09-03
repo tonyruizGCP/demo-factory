@@ -1,0 +1,16 @@
+# cxaslint.yaml — Acme Scout with Memory Linter Configuration
+
+app_dir: .
+evals_dir: ../evals/
+
+per_file:
+  "**/Acme_Scout_Memory/instruction.txt":
+    I009: off
+    S002: off
+    I013: off
+  "**/Acme_Scout_Memory/Acme_Scout_Memory.json":
+    A003: off
+    I012: off
+  "tools/**/*.py":
+    T001: off
+    T011: off

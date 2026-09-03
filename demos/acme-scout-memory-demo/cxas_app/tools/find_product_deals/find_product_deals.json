@@ -1,0 +1,9 @@
+{
+  "name": "79c1c488-2e97-4fc3-82b6-c993d543526e",
+  "displayName": "find_product_deals",
+  "pythonFunction": {
+    "name": "find_product_deals",
+    "pythonCode": "tools/find_product_deals/python_function/python_code.py",
+    "description": "Searches for enterprise hardware, cloud infrastructure, and procurement deals in the Acme catalog.\n\nArgs:\n    query (str): A text query describing the product or solution (e.g., \"Edge AI Gateway\", \"Cloud Compute Cluster\").\n    image_metadata (dict | None): Optional metadata extracted from an uploaded blueprint or equipment image.\n\nReturns:\n    dict[str, Any]: A dictionary containing details of the verified enterprise solution, or an indication if no deal is found."
+  }
+}
