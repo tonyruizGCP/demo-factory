@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACME Inc | Gemini Enterprise Agent Platform Skill Registry & ADK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="logo-badge">ACME</div>
+        <div>
+          <h1>Enterprise Agent Platform: Skill Registry & ADK</h1>
+          <p class="subtitle">Hub-and-Spoke Retail Intelligence Architecture</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="pill-badge pill-google"><span class="dot"></span> Gemini Enterprise Agent Platform</span>
+        <span class="pill-badge pill-adk">ADK 2.x Hub</span>
+        <span class="pill-badge pill-beta">Beta Ready</span>
+      </div>
+    </header>
+
+    <div class="main-body">
+      <!-- Left Sidebar: Skill Registry Catalog & Store Config -->
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <h3>🏬 Store & Persona Context</h3>
+          <div class="form-group">
+            <label for="store-select">Active Retail Store</label>
+            <select id="store-select" class="custom-select">
+              <option value="104" selected>#104 - Downtown Chicago Flagship</option>
+              <option value="208">#208 - West Suburbs Center</option>
+              <option value="315">#315 - Austin Metro Mall</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="persona-select">User Persona</label>
+            <select id="persona-select" class="custom-select">
+              <option value="Store Manager" selected>Store Manager (Frontline)</option>
+              <option value="Assistant Store Manager">Assistant Store Manager</option>
+              <option value="Regional Operations Director">Regional Operations Director</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="section-title-row">
+            <h3>📦 Enterprise Skill Registry</h3>
+            <span class="badge-count" id="skills-count">3 Skills</span>
+          </div>
+          <p class="section-help">Modular, versioned skills published to Google Cloud Skill Registry.</p>
+          <div id="skills-list" class="skills-list">
+            <!-- Dynamic Skills Inserted Here -->
+            <div class="skill-card active" data-skill="store-performance-review">
+              <div class="skill-card-header">
+                <strong>store-performance-review</strong>
+                <span class="tag-status">Published</span>
+              </div>
+              <p class="skill-desc">Full financial, conversion, and labor review for store managers.</p>
+              <div class="skill-meta">
+                <span>⚡ calculate_store_kpis.py</span>
+                <span>📄 kpi_benchmarks.md</span>
+              </div>
+            </div>
+
+            <div class="skill-card" data-skill="daily-summary-recap">
+              <div class="skill-card-header">
+                <strong>daily-summary-recap</strong>
+                <span class="tag-status">Published</span>
+              </div>
+              <p class="skill-desc">3-minute flash recap for morning floor supervisor huddle.</p>
+              <div class="skill-meta">
+                <span>⚡ generate_huddle_brief.py</span>
+                <span>📄 huddle_template.md</span>
+              </div>
+            </div>
+
+            <div class="skill-card" data-skill="inventory-optimization-audit">
+              <div class="skill-card-header">
+                <strong>inventory-optimization-audit</strong>
+                <span class="tag-status">Published</span>
+              </div>
+              <p class="skill-desc">Audits safety stocks, critical stockouts, and replenishment triggers.</p>
+              <div class="skill-meta">
+                <span>⚡ audit_inventory.py</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="architecture-card">
+            <h4>💡 Why Hub-and-Spoke?</h4>
+            <p>1 hardened ADK Agent ("Retail Data Analyst") provides unified data tools; N modular Skills in the Registry provide specialized procedural contexts.</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center: Agent Interactive Chat / Execution Workspace -->
+      <main class="chat-workspace">
+        <div class="workspace-header">
+          <div>
+            <h2>Retail Data Analyst Agent</h2>
+            <p class="agent-model">Powered by <code>gemini-2.5-flash</code> + <code>SkillToolset</code></p>
+          </div>
+          <div class="quick-prompts-bar">
+            <span>Quick Queries:</span>
+            <button class="chip-btn" data-query="Run a store performance review for Store #104">📊 Performance Review</button>
+            <button class="chip-btn" data-query="Generate yesterday's daily summary recap for morning huddle">☀️ Morning Recap</button>
+            <button class="chip-btn" data-query="Audit store inventory levels and stockout risks">📦 Inventory Audit</button>
+          </div>
+        </div>
+
+        <!-- Chat History -->
+        <div id="chat-stream" class="chat-stream">
+          <div class="chat-message assistant-message welcome-msg">
+            <div class="msg-avatar">🤖</div>
+            <div class="msg-body">
+              <h3>Hello, Store Operations!</h3>
+              <p>I am your central <strong>Retail Data Analyst Agent</strong>. I have direct access to ACME Inc's transactional data warehouse, inventory systems, and the <strong>Gemini Enterprise Skill Registry</strong>.</p>
+              <p>Ask me for a store diagnostic, morning recap, or inventory audit, and I will dynamically discover and load the required skill from our cloud registry to generate your report.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Bar -->
+        <div class="chat-input-area">
+          <form id="chat-form" class="chat-form">
+            <input type="text" id="user-input" placeholder="Ask a question (e.g. 'Run store performance review for Store #104')..." autocomplete="off" required>
+            <button type="submit" id="send-btn" class="send-button">
+              <span>Send Query</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+          </form>
+        </div>
+      </main>
+
+      <!-- Right: Real-time Execution Flow Trace -->
+      <aside class="trace-panel">
+        <div class="trace-header">
+          <h3>⚡ ADK Execution Trace</h3>
+          <span class="badge-realtime">Live Telemetry</span>
+        </div>
+        <p class="trace-sub">Observability trace of in-flight skill discovery, loading, and script execution.</p>
+
+        <div id="trace-timeline" class="trace-timeline">
+          <div class="trace-placeholder">
+            <div class="pulse-icon">⏱️</div>
+            <p>Awaiting query. Trigger a prompt to inspect step-by-step ADK & Skill Registry execution.</p>
+          </div>
+        </div>
+
+        <!-- SKILL.md Inspector Modal Trigger -->
+        <div class="inspector-box">
+          <h4>Active Skill Definition</h4>
+          <div id="active-skill-info" class="active-skill-info">
+            <strong>store-performance-review</strong>
+            <p>Inspect raw SKILL.md specification and embedded python automation script.</p>
+            <button id="view-skill-modal-btn" class="btn-secondary">View SKILL.md Spec</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Modal for Inspecting SKILL.md -->
+  <div id="skill-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-skill-title">Skill Specification: store-performance-review</h3>
+        <button id="close-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-tabs">
+          <button class="tab-btn active" data-tab="tab-instructions">SKILL.md Instructions</button>
+          <button class="tab-btn" data-tab="tab-script">Bundled Script</button>
+          <button class="tab-btn" data-tab="tab-reference">KPI Rubric Reference</button>
+        </div>
+        <div id="tab-instructions" class="tab-content active">
+          <pre><code id="skill-instructions-code">Loading instructions...</code></pre>
+        </div>
+        <div id="tab-script" class="tab-content">
+          <pre><code id="skill-script-code">Loading script...</code></pre>
+        </div>
+        <div id="tab-reference" class="tab-content">
+          <pre><code id="skill-reference-code">Loading reference...</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
