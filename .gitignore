@@ -9,3 +9,5 @@ generated_projects/
 *.egg-info/
 dist/
 build/
+.worktrees/
+.agents/

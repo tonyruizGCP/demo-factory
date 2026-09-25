@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini Enterprise Coding Harness | Agent = Model + Harness</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="logo-gemini">✦</div>
+        <div>
+          <h1>Gemini Enterprise <span class="badge">Coding Harness</span></h1>
+          <p class="subtitle">Agent Development Kit (ADK) • Session Manager • Memory Bank • Git Worktrees</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="status-indicator">
+          <span class="dot pulse"></span>
+          <span id="backend-mode-badge" class="badge-mode badge-local">Backend: Local</span>
+        </div>
+        <div class="status-indicator">
+          <span id="session-branch-label">Branch: main (Clean)</span>
+        </div>
+        <button id="btn-reset-session" class="btn btn-secondary">New Session</button>
+      </div>
+    </header>
+
+    <!-- Main Grid Layout -->
+    <main class="grid-layout">
+      <!-- Left Column: Chat & Stream -->
+      <section class="panel chat-panel">
+        <div class="panel-header">
+          <h2>💬 Execution Console & Tool Telemetry</h2>
+          <span class="badge-subtle">SSE Streaming</span>
+        </div>
+
+        <div id="chat-stream" class="chat-stream">
+          <div class="message system-msg">
+            <div class="msg-title">⚡ Gemini Enterprise Coding Harness Initialized</div>
+            <p>Ready to showcase: <strong>Prewalk Grounding</strong>, <strong>LSP AST Navigation</strong>, <strong>Worktree Subagent Sandboxing</strong>, and <strong>Closed-Loop Verification</strong>.</p>
+          </div>
+        </div>
+
+        <div class="prompt-suggestions">
+          <button class="chip" data-prompt="Refactor SessionManager to support non-blocking async SQLite storage">
+            🛠️ Refactor SessionManager (Async)
+          </button>
+          <button class="chip" data-prompt="Find all references and definitions for SessionManager using in-process LSP">
+            🔍 LSP Symbol Tracing
+          </button>
+          <button class="chip" data-prompt="Run pytest test suite using DAP execution sandbox">
+            🧪 DAP Sandbox Tests
+          </button>
+        </div>
+
+        <form id="chat-form" class="chat-input-row">
+          <input type="text" id="user-input" placeholder="Give an instruction to the harness orchestrator..." autocomplete="off">
+          <button type="submit" id="btn-submit" class="btn btn-primary">Run</button>
+        </form>
+      </section>
+
+      <!-- Right Column: Harness Inspection Tabs -->
+      <aside class="panel inspector-panel">
+        <div class="tab-header">
+          <button class="tab-btn active" data-tab="memory-tab">🧠 Memory Bank</button>
+          <button class="tab-btn" data-tab="trajectory-tab">🌳 Session Tree (Rewind)</button>
+          <button class="tab-btn" data-tab="worktree-tab">🌿 Worktree & Diff</button>
+        </div>
+
+        <!-- Tab 1: Memory Bank -->
+        <div id="memory-tab" class="tab-content active">
+          <div class="section-intro">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <h3>Vertex AI Memory Bank</h3>
+              <span id="memory-mode-indicator" class="badge-mode badge-local">Mode: Local</span>
+            </div>
+            <p>Persistent semantic memories and enterprise guidelines retrieved at prewalk and consolidated at session completion.</p>
+          </div>
+          <div id="memory-list" class="card-list">
+            <!-- Dynamic Memory Cards -->
+          </div>
+        </div>
+
+        <!-- Tab 2: Trajectory Tree & Rewind -->
+        <div id="trajectory-tab" class="tab-content">
+          <div class="section-intro">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <h3>Transcript Trajectory & Rewind</h3>
+              <span id="session-mode-indicator" class="badge-mode badge-local">Mode: Local</span>
+            </div>
+            <p>State snapshots across turns. Select any previous turn to rewind the harness state (analogous to DOM-diff replay).</p>
+          </div>
+          <div id="turn-history" class="turn-tree">
+            <!-- Dynamic Turn Tree -->
+          </div>
+        </div>
+
+        <!-- Tab 3: Git Worktree & Diff -->
+        <div id="worktree-tab" class="tab-content">
+          <div class="section-intro">
+            <h3>Subagent Git Worktree Sandboxing</h3>
+            <p>Isolated ephemeral worktrees protect the active branch from experimental modifications.</p>
+          </div>
+          <div class="worktree-status-box">
+            <div class="worktree-meta">
+              <span><strong>Active Worktree:</strong> <code id="active-wt-name">None (Direct)</code></span>
+              <span id="wt-isolation-badge" class="badge-isolation">Isolated</span>
+            </div>
+            <pre class="diff-viewer"><code id="diff-content">// No pending changes in worktree sandbox.</code></pre>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="/static/main.js"></script>
+</body>
+</html>
