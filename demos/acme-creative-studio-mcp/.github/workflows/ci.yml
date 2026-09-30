@@ -1,0 +1,31 @@
+name: SDLC Quality Gate - Acme Inc. Creative Studio MCP App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Check Crypto Pinning & ADK Entrypoint
+        run: |
+          grep -q "pyopenssl==24.3.0" requirements.txt
+          grep -q "cryptography==44.0.3" requirements.txt
+          grep -q "root_agent" app/agent.py
+      - name: Run Deterministic Unit & MCP Integration Tests
+        run: |
+          pytest tests/ -v
+      - name: Run Agent Trajectory & Rubric Evals
+        run: |
+          python3 -m app.eval_runner --min-score 0.85

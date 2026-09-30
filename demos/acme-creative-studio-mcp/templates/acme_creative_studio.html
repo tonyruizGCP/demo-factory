@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acme Inc. Creative Studio — Gemini Omni + Nano Banana MCP App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-app: #0b0f19;
+      --bg-surface: #111827;
+      --bg-card: #1a2234;
+      --bg-elevated: #232e45;
+      --border: #2e3b56;
+      --border-subtle: #1f293d;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-primary: #38bdf8;
+      --accent-secondary: #a855f7;
+      --accent-banana: #facc15;
+      --accent-success: #22c55e;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-app);
+      color: var(--text-primary);
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top App Header */
+    .studio-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: rgba(17, 24, 39, 0.95);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.35);
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .pill-omni {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-primary);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    .pill-banana {
+      background: rgba(250, 204, 21, 0.15);
+      color: var(--accent-banana);
+      border: 1px solid rgba(250, 204, 21, 0.35);
+    }
+
+    .pill-gcs {
+      background: rgba(34, 197, 94, 0.14);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: none;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    select, input[type="text"], textarea {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      font-family: inherit;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    select:focus, input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent-primary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+    }
+
+    .btn:hover:not(:disabled) {
+      filter: brightness(1.12);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #7c3aed);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn-banana {
+      background: linear-gradient(135deg, #eab308, #f97316);
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text-secondary);
+    }
+
+    .btn-outline:hover:not(:disabled) {
+      color: var(--text-primary);
+      border-color: var(--accent-primary);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
+    /* Live Job Progress Banner */
+    .job-banner {
+      display: none;
+      background: linear-gradient(90deg, rgba(2, 132, 199, 0.22), rgba(168, 85, 247, 0.22));
+      border-bottom: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 8px 16px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .job-banner.active {
+      display: flex;
+    }
+
+    .job-progress-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .job-progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(15, 23, 42, 0.7);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .job-progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-banana));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-banana);
+      box-shadow: 0 0 8px var(--accent-banana);
+      animation: pulseAnim 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulseAnim {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.55; }
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tab-group {
+      display: flex;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      color: var(--accent-primary);
+      border-bottom-color: var(--accent-primary);
+    }
+
+    .count-chip {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border-radius: 999px;
+      padding: 1px 6px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* Prompt Composer Bar */
+    .prompt-composer {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .prompt-input-wrap {
+      flex: 1;
+      min-width: 240px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .prompt-input-wrap input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+
+    /* Main Workspace Layout */
+    .workspace-container {
+      padding: 14px 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .studio-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Visual Canvas Preview */
+    .visual-stage {
+      background: #070a12;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 320px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .visual-stage img {
+      max-width: 100%;
+      max-height: 430px;
+      border-radius: 6px;
+      object-fit: contain;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .palette-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .swatch-list {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .swatch-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+
+    .swatch-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    /* Form Fields */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .field-group input, .field-group textarea {
+      width: 100%;
+    }
+
+    .field-group textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    /* Channel Variations Mini Tabs */
+    .channel-bar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .channel-pill {
+      padding: 4px 9px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .channel-pill.active {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+
+    .channel-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      font-size: 12px;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+    }
+
+    /* Insights List */
+    .insights-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .insights-list li {
+      background: rgba(56, 189, 248, 0.06);
+      border-left: 3px solid var(--accent-primary);
+      padding: 6px 10px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+
+    /* Reference Upload Zone & Gallery */
+    .upload-dropzone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      text-align: center;
+      background: rgba(26, 34, 52, 0.5);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .upload-dropzone:hover, .upload-dropzone.dragover {
+      border-color: var(--accent-primary);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    .ref-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 10px;
+    }
+
+    .ref-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ref-thumb {
+      width: 100%;
+      height: 110px;
+      background: #070a12;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .ref-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Version History & Diff */
+    .version-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .version-row {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .version-row.active-version {
+      border-color: var(--accent-primary);
+      background: rgba(56, 189, 248, 0.07);
+    }
+
+    .diff-box {
+      background: #070a12;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      max-height: 340px;
+      overflow-y: auto;
+    }
+
+    .diff-line-add {
+      color: #4ade80;
+      background: rgba(34, 197, 94, 0.12);
+      display: block;
+    }
+
+    .diff-line-del {
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.12);
+      display: block;
+    }
+
+    /* Jobs Table */
+    .job-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .status-badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .status-running, .status-queued {
+      background: rgba(250, 204, 21, 0.18);
+      color: var(--accent-banana);
+      border: 1px solid rgba(250, 204, 21, 0.4);
+    }
+
+    .status-completed {
+      background: rgba(34, 197, 94, 0.18);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+    .status-failed {
+      background: rgba(239, 68, 68, 0.18);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    /* Floating Notification Toast Stack */
+    .toast-stack {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 360px;
+    }
+
+    .toast-item {
+      background: rgba(17, 24, 39, 0.96);
+      border: 1px solid var(--accent-primary);
+      border-left: 4px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      animation: slideInToast 0.2s ease-out;
+    }
+
+    @keyframes slideInToast {
+      from { transform: translateY(12px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Studio Bar -->
+  <header class="studio-header">
+    <div class="brand-cluster">
+      <div class="brand-logo">A</div>
+      <div>
+        <div class="brand-title">
+          <span>Acme Inc. Creative Studio</span>
+          <span class="pill-badge pill-omni">Gemini Omni</span>
+          <span class="pill-badge pill-banana">Nano Banana</span>
+        </div>
+        <div class="brand-subtitle">
+          <span id="campaignSubLabel">Multimodal Ad Copy & Visual Asset Workbench</span>
+          <span>•</span>
+          <span class="pill-badge pill-gcs" id="gcsBucketBadge">gs://acme-creative-studio</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <label for="campaignSelect" style="font-size:11px;color:var(--text-secondary);">Campaign:</label>
+      <select id="campaignSelect" title="Select Acme Inc. Campaign"></select>
+
+      <label for="versionQuickSelect" style="font-size:11px;color:var(--text-secondary);">GCS Version:</label>
+      <select id="versionQuickSelect" title="Switch Content Version"></select>
+
+      <button class="btn btn-outline btn-sm" id="btnToggleDisplayMode" title="Toggle Picture-in-Picture / Fullscreen Mode">
+        ⛶ Expand / PiP
+      </button>
+    </div>
+  </header>
+
+  <!-- Active Backend Job Progress Banner -->
+  <div class="job-banner" id="activeJobBanner">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="pulse-dot"></div>
+      <div>
+        <div style="font-weight:700;font-size:12px;" id="activeJobTitle">Running Gemini Omni + Nano Banana Job...</div>
+        <div style="font-size:11px;color:var(--text-secondary);" id="activeJobStage">Synthesizing multimodal ad copy and visual layers...</div>
+      </div>
+    </div>
+    <div class="job-progress-wrap" style="max-width:260px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;">
+        <span id="activeJobIdLabel" class="mono">job_...</span>
+        <span id="activeJobPctLabel">0%</span>
+      </div>
+      <div class="job-progress-bar-bg">
+        <div class="job-progress-bar-fill" id="activeJobProgressBar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt & Generation Bar -->
+  <section class="prompt-composer">
+    <div class="prompt-input-wrap">
+      <input type="text" id="creativePromptInput" placeholder="Describe ad direction (e.g., 'Add a bold 25% launch discount badge, emphasize rugged durability, and warm golden-hour lighting')..." />
+    </div>
+    <select id="aspectRatioSelect" title="Nano Banana Aspect Ratio">
+      <option value="1:1">1:1 Square (Feed / Carousel)</option>
+      <option value="16:9">16:9 Landscape (Display / YouTube)</option>
+      <option value="9:16">9:16 Vertical (Reels / Stories)</option>
+    </select>
+    <select id="toneSelect" title="Gemini Omni Copy Tone">
+      <option value="Bold, cinematic, high-converting">Tone: Bold & Cinematic</option>
+      <option value="Playful, witty, high-energy">Tone: Playful & Witty</option>
+      <option value="Executive, authoritative, ROI-driven">Tone: Executive & ROI-Driven</option>
+      <option value="Warm, sensory, lifestyle-focused">Tone: Warm & Lifestyle</option>
+    </select>
+    <button class="btn btn-banana" id="btnGenerateCreative">
+      ✨ Generate with Gemini Omni + Nano Banana
+    </button>
+  </section>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <div class="tab-group">
+      <button class="tab-btn active" data-tab="studio">
+        🎨 Creative Studio Canvas
+      </button>
+      <button class="tab-btn" data-tab="references">
+        📎 Reference Images & Briefs <span class="count-chip" id="refCountChip">0</span>
+      </button>
+      <button class="tab-btn" data-tab="versions">
+        🗄️ GCS Version History & Diff <span class="count-chip" id="versionCountChip">0</span>
+      </button>
+      <button class="tab-btn" data-tab="jobs">
+        ⚡ Backend Jobs & Notifications <span class="count-chip" id="jobCountChip">0</span>
+      </button>
+    </div>
+    <div style="font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:8px;">
+      <span id="currentVersionBadge" class="pill-badge pill-omni">v1</span>
+      <span id="connectionModeBadge" style="color:var(--text-muted);">MCP Bridge Ready</span>
+    </div>
+  </nav>
+
+  <!-- Main Workspace -->
+  <main class="workspace-container">
+
+    <!-- TAB 1: STUDIO CANVAS -->
+    <section class="tab-pane active" id="tab-studio">
+      <div class="studio-grid">
+        <!-- Left Column: Nano Banana Visual Creative Preview -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>🍌 Nano Banana Visual Creative</span>
+              <span class="pill-badge pill-banana" id="visualAspectBadge">1:1</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-outline btn-sm" id="btnDownloadSvg" title="Download layered SVG from GCS mirror">
+                ⬇ SVG
+              </button>
+              <button class="btn btn-outline btn-sm" id="btnDownloadBundle" title="Download full JSON bundle">
+                ⬇ Bundle
+              </button>
+            </div>
+          </div>
+
+          <div class="visual-stage" id="visualStageContainer">
+            <img id="nanoBananaPreviewImg" alt="Nano Banana Visual Creative Preview" src="" />
+          </div>
+
+          <div class="palette-row">
+            <div class="swatch-list" id="paletteSwatchList"></div>
+            <span style="font-size:11px;color:var(--text-secondary);" id="visualModelBadge">gemini-3.1-flash-image-preview</span>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">
+              <span>Nano Banana Visual Prompt & Composition</span>
+            </div>
+            <textarea id="visualPromptField" rows="2" placeholder="Visual generation prompt..."></textarea>
+          </div>
+
+          <div style="font-size:11px;color:var(--text-secondary);background:var(--bg-card);padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);" id="compositionNotesBox">
+            Composition notes loading...
+          </div>
+        </div>
+
+        <!-- Right Column: Gemini Omni Interactive Ad Copy Editor -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>🧠 Gemini Omni Ad Copy & Multimodal Synthesis</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="pill-badge pill-gcs" id="brandScoreBadge">Brand Score: 96%</span>
+              <button class="btn btn-primary btn-sm" id="btnSaveCopyVersion">
+                💾 Save Edits as New GCS Version
+              </button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">
+              <span>Headline</span>
+              <span style="color:var(--text-muted);">Live updates Nano Banana preview</span>
+            </div>
+            <input type="text" id="headlineField" placeholder="Primary Headline..." />
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">
+              <span>Subheadline</span>
+            </div>
+            <input type="text" id="subheadlineField" placeholder="Supporting subheadline..." />
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">
+              <span>Primary Ad Copy (Body)</span>
+            </div>
+            <textarea id="primaryTextField" rows="4" placeholder="High-converting multimodal ad body copy..."></textarea>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field-group">
+              <div class="field-label"><span>Call To Action (CTA)</span></div>
+              <input type="text" id="ctaField" placeholder="e.g., Shop Trailblazer X1" />
+            </div>
+            <div class="field-group">
+              <div class="field-label"><span>Version Summary Note</span></div>
+              <input type="text" id="editNotesField" placeholder="e.g., Tightened headline & CTA" />
+            </div>
+          </div>
+
+          <!-- Omnichannel Copy Variations -->
+          <div class="field-group" style="margin-top:4px;">
+            <div class="field-label">
+              <span>Omnichannel Copy Variations (Gemini Omni)</span>
+            </div>
+            <div class="channel-bar" id="channelPillsBar"></div>
+            <div class="channel-box" id="channelVariationContent">Select a channel above to inspect tailored copy.</div>
+          </div>
+
+          <!-- Gemini Omni Multimodal Grounding Insights -->
+          <div class="field-group">
+            <div class="field-label">
+              <span>Gemini Omni Multimodal Grounding & Reference Insights</span>
+            </div>
+            <ul class="insights-list" id="omniInsightsList"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: REFERENCE IMAGES & CONTENT -->
+    <section class="tab-pane" id="tab-references">
+      <div class="studio-grid">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">📤 Upload Reference Image or Brand Content</div>
+            <span class="pill-badge pill-gcs">Persisted to GCS Bucket</span>
+          </div>
+
+          <div class="upload-dropzone" id="uploadDropzone">
+            <input type="file" id="referenceFileInput" accept="image/*,.txt,.md,.json,.csv" style="display:none;" />
+            <div style="font-size:24px;margin-bottom:6px;">🖼️ 📄</div>
+            <div style="font-weight:700;font-size:13px;margin-bottom:4px;">
+              Click or Drag & Drop Reference Image (PNG, JPG, SVG, WebP) or Brief (.md, .txt)
+            </div>
+            <div style="font-size:11px;color:var(--text-secondary);">
+              Uploaded references are stored in GCS (<span class="mono">gs://.../references/</span>) and grounded into Gemini Omni + Nano Banana jobs.
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label"><span>Or Add Reference Content / Brand Guidelines Note Directly</span></div>
+            <input type="text" id="refNameInput" placeholder="Reference filename (e.g., summer_promo_guidelines.md)" />
+            <textarea id="refContentInput" rows="3" placeholder="Paste product claims, mandatory legal disclaimers, visual style cues, or competitor positioning..."></textarea>
+            <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+              <button class="btn btn-primary btn-sm" id="btnUploadTextRef">
+                ➕ Save Reference Content to GCS
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">🗂️ Campaign Brief & Active Reference Assets</div>
+            <button class="btn btn-banana btn-sm" id="btnRegenerateWithRefs">
+              ✨ Re-Synthesize Campaign with References
+            </button>
+          </div>
+
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:10px;font-size:12px;">
+            <div style="font-weight:700;margin-bottom:4px;" id="briefProductTitle">Product</div>
+            <div style="color:var(--text-secondary);margin-bottom:6px;" id="briefAudienceText">Target Audience</div>
+            <div style="color:var(--text-primary);" id="briefBrandNotes">Brand Guidelines</div>
+          </div>
+
+          <div class="ref-grid" id="referenceGalleryGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: GCS VERSION HISTORY & DIFF VIEWER -->
+    <section class="tab-pane" id="tab-versions">
+      <div class="studio-grid">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">🗄️ GCS Bucket Content Versions</div>
+            <span class="pill-badge pill-gcs" id="versionBucketUriLabel">gs://...</span>
+          </div>
+          <div class="version-list" id="versionHistoryList"></div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">🔍 Side-by-Side Version Comparison (Diff)</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <select id="diffVersionASelect" title="Base Version"></select>
+              <span style="color:var(--text-secondary);">→</span>
+              <select id="diffVersionBSelect" title="Target Version"></select>
+              <button class="btn btn-outline btn-sm" id="btnRunDiff">Compare</button>
+            </div>
+          </div>
+
+          <div id="diffFieldsSummary" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <div class="diff-box" id="diffUnifiedOutput">Select two versions above and click Compare to inspect GCS version diffs.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: ACTIVE BACKEND JOBS & NOTIFICATIONS -->
+    <section class="tab-pane" id="tab-jobs">
+      <div class="studio-grid">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">⚡ Active & Recent Backend Jobs</div>
+            <button class="btn btn-outline btn-sm" id="btnRefreshJobs">↻ Refresh State</button>
+          </div>
+          <div id="jobsListContainer" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">🔔 User Notification Feed</div>
+            <button class="btn btn-outline btn-sm" id="btnAckAllNotifications">✓ Dismiss All Unread</button>
+          </div>
+          <div id="notificationsListContainer" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Floating Toast Stack for Unread Job Notifications -->
+  <div class="toast-stack" id="toastStack"></div>
+
+  <script>
+    /*************************************************************************
+     * 1. INITIAL HYDRATION STATE & GLOBAL STUDIO STATE
+     *************************************************************************/
+    const INITIAL_STATE = /*__INITIAL_STUDIO_STATE__*/{};
+    let studioState = (INITIAL_STATE && INITIAL_STATE.campaign_id) ? INITIAL_STATE : null;
+    let activeChannelKey = "instagram_reel";
+    let currentDisplayMode = "pip";
+    let pollTimer = null;
+    let seenToastIds = new Set();
+
+    /*************************************************************************
+     * 2. GEMINI ENTERPRISE MCP APPBRIDGE + SERIALIZED RPC QUEUE
+     *************************************************************************/
+    const isEmbeddedHost = (window.parent && window.parent !== window);
+    const pendingRequests = new Map();
+    let rpcCounter = 1;
+    let toolCallChain = Promise.resolve();
+
+    function sendPostMessageToHost(payload) {
+      if (isEmbeddedHost) {
+        window.parent.postMessage(payload, "*");
+      }
+    }
+
+    function sendRpcRequest(method, params = {}, timeoutMs = 25000) {
+      if (!isEmbeddedHost) {
+        return handleStandaloneRpc(method, params);
+      }
+      return new Promise((resolve, reject) => {
+        const id = rpcCounter++;
+        const timer = setTimeout(() => {
+          pendingRequests.delete(id);
+          reject(new Error(`RPC timeout (${timeoutMs}ms) for ${method}`));
+        }, timeoutMs);
+
+        pendingRequests.set(id, { resolve, reject, timer });
+        sendPostMessageToHost({
+          jsonrpc: "2.0",
+          id,
+          method,
+          params
+        });
+      });
+    }
+
+    /**
+     * Serialized tools/call queue with 120ms cooldown so Gemini Enterprise's
+     * WidgetExecuteUiWidgetAction stream teardown never collides with rapid calls.
+     */
+    function callMcpTool(toolName, args = {}) {
+      const executeNext = async () => {
+        try {
+          const res = await sendRpcRequest("tools/call", {
+            name: toolName,
+            arguments: args
+          });
+          await new Promise(r => setTimeout(r, 120));
+          return extractStructuredResult(res);
+        } catch (err) {
+          console.warn(`[CreativeStudio] Tool call ${toolName} error:`, err);
+          // Fallback to direct HTTP /mcp if running locally or host bridge timed out
+          return await directHttpToolCall(toolName, args);
+        }
+      };
+      toolCallChain = toolCallChain.then(executeNext, executeNext);
+      return toolCallChain;
+    }
+
+    function extractStructuredResult(rpcResult) {
+      if (!rpcResult) return null;
+      if (rpcResult.structuredContent) {
+        if (rpcResult.structuredContent.studio_state) {
+          applyStudioState(rpcResult.structuredContent.studio_state);
+        }
+        return rpcResult.structuredContent;
+      }
+      if (Array.isArray(rpcResult.content)) {
+        for (const item of rpcResult.content) {
+          if (item && item.type === "text" && item.text) {
+            try {
+              const parsed = JSON.parse(item.text);
+              if (parsed.studio_state) applyStudioState(parsed.studio_state);
+              return parsed;
+            } catch (_) {}
+          }
+        }
+      }
+      return rpcResult;
+    }
+
+    async function directHttpToolCall(toolName, args = {}) {
+      const response = await fetch("/mcp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: rpcCounter++,
+          method: "tools/call",
+          params: { name: toolName, arguments: args }
+        })
+      });
+      const payload = await response.json();
+      if (payload.error) {
+        throw new Error(payload.error.message || "MCP HTTP tool call failed");
+      }
+      return extractStructuredResult(payload.result);
+    }
+
+    async function handleStandaloneRpc(method, params) {
+      if (method === "ui/initialize") {
+        return { protocolVersion: "2025-06-18", hostContext: { mode: "standalone" } };
+      }
+      if (method === "ui/request-display-mode") {
+        currentDisplayMode = params.mode || "fullscreen";
+        return { mode: currentDisplayMode };
+      }
+      if (method === "ui/update-model-context") {
+        return { ok: true };
+      }
+      if (method === "ui/open-link") {
+        if (params && params.url) {
+          window.open(params.url, "_blank", "noopener,noreferrer");
+        }
+        return { ok: true };
+      }
+      if (method === "tools/call") {
+        return await directHttpToolCall(params.name, params.arguments || {});
+      }
+      return {};
+    }
+
+    window.addEventListener("message", (event) => {
+      const data = event.data;
+      if (!data || typeof data !== "object" || data.jsonrpc !== "2.0") return;
+
+      if (data.id !== undefined && (data.result !== undefined || data.error !== undefined)) {
+        const entry = pendingRequests.get(data.id);
+        if (entry) {
+          clearTimeout(entry.timer);
+          pendingRequests.delete(data.id);
+          if (data.error) {
+            entry.reject(new Error(data.error.message || "RPC Error"));
+          } else {
+            entry.resolve(data.result);
+          }
+        }
+        return;
+      }
+
+      // Handle incoming notifications from Gemini Enterprise host
+      if (data.method === "ui/notifications/tool-result" || data.method === "notifications/tool-result") {
+        extractStructuredResult(data.params);
+      } else if (data.method === "ui/notifications/tool-input") {
+        const args = (data.params && data.params.arguments) || {};
+        if (args.campaign_id && (!studioState || args.campaign_id !== studioState.campaign_id)) {
+          callMcpTool("get_studio_state", { campaign_id: args.campaign_id });
+        }
+      }
+    });
+
+    async function initMcpAppBridge() {
+      const badge = document.getElementById("connectionModeBadge");
+      if (isEmbeddedHost) {
+        badge.textContent = "Gemini Enterprise MCP Bridge";
+        try {
+          await sendRpcRequest("ui/initialize", {
+            protocolVersion: "2025-06-18",
+            appInfo: { name: "Acme Creative Studio", version: "1.0.0" },
+            appCapabilities: {
+              experimental: {},
+              tools: { listChanged: false },
+               availableDisplayModes: ["pip", "inline", "fullscreen"]
+            }
+          }, 4000);
+        } catch (_) {}
+
+        // Emit BOTH MCP Apps & legacy initialized notifications to clear GE spinner immediately
+        sendPostMessageToHost({ jsonrpc: "2.0", method: "ui/notifications/initialized", params: {} });
+        sendPostMessageToHost({ jsonrpc: "2.0", method: "notifications/initialized", params: {} });
+
+        // Request PiP or Fullscreen display mode
+        sendRpcRequest("ui/request-display-mode", { mode: "pip" }).catch(() => {});
+      } else {
+        badge.textContent = "Standalone HTTP Bridge (/mcp)";
+      }
+
+      if (studioState && studioState.campaign_id) {
+        renderStudioState(studioState);
+      }
+      const initialCampaign = (studioState && studioState.campaign_id) || "acme_trailblazer_x1";
+      await callMcpTool("get_studio_state", { campaign_id: initialCampaign });
+      startAdaptivePolling();
+    }
+
+    function pushModelContextUpdate(summaryText) {
+      if (!isEmbeddedHost) return;
+      sendRpcRequest("ui/update-model-context", {
+        content: [{ type: "text", text: summaryText }]
+      }).catch(() => {});
+    }
+
+    function openExternalOrDownloadLink(url) {
+      if (!url) return;
+      const resolvedUrl = url.startsWith("http") ? url : `${window.location.origin}${url}`;
+      if (isEmbeddedHost) {
+        sendRpcRequest("ui/open-link", { url: resolvedUrl }).catch(() => {
+          window.open(resolvedUrl, "_blank", "noopener,noreferrer");
+        });
+      } else {
+        window.open(resolvedUrl, "_blank", "noopener,noreferrer");
+      }
+    }
+
+    /*************************************************************************
+     * 3. RENDERING & STATE SYNCHRONIZATION
+     *************************************************************************/
+    function applyStudioState(nextState) {
+      if (!nextState || !nextState.campaign_id) return;
+      const prevVersionNum = studioState && studioState.active_version ? studioState.active_version.version_number : null;
+      const prevCampaignId = studioState ? studioState.campaign_id : null;
+      studioState = nextState;
+      renderStudioState(studioState, prevCampaignId !== nextState.campaign_id || prevVersionNum !== (nextState.active_version && nextState.active_version.version_number));
+    }
+
+    function renderStudioState(state, refreshEditorFields = false) {
+      if (!state) return;
+
+      // 1. Header & Campaign Selector
+      const campaignSelect = document.getElementById("campaignSelect");
+      if (Array.isArray(state.campaigns)) {
+        campaignSelect.innerHTML = state.campaigns.map(c =>
+          `<option value="${escapeHtml(c.campaign_id)}" ${c.campaign_id === state.campaign_id ? "selected" : ""}>${escapeHtml(c.title)} — ${escapeHtml(c.product_name)}</option>`
+        ).join("");
+      }
+
+      document.getElementById("gcsBucketBadge").textContent = `gs://${state.gcs_bucket || "acme-creative-studio"}`;
+      document.getElementById("versionBucketUriLabel").textContent = `gs://${state.gcs_bucket || "acme-creative-studio"}/campaigns/${state.campaign_id}/versions/`;
+
+      // 2. Version Quick Select
+      const versions = state.versions || [];
+      const activeVer = state.active_version || {};
+      document.getElementById("versionCountChip").textContent = versions.length;
+      document.getElementById("currentVersionBadge").textContent = activeVer.version_id ? `${activeVer.version_id} (${activeVer.storage_backend || "gcs"})` : "v1";
+
+      const vSelect = document.getElementById("versionQuickSelect");
+      vSelect.innerHTML = versions.map(v =>
+        `<option value="${v.version_number}" ${v.version_number === activeVer.version_number ? "selected" : ""}>${escapeHtml(v.version_id)} — ${escapeHtml((v.summary || "").slice(0, 38))}</option>`
+      ).join("");
+
+      // Populate Diff Selectors if empty or campaign changed
+      const diffA = document.getElementById("diffVersionASelect");
+      const diffB = document.getElementById("diffVersionBSelect");
+      if (refreshEditorFields || diffA.options.length !== versions.length) {
+        diffB.innerHTML = versions.map((v, idx) =>
+          `<option value="${v.version_number}" ${idx === 0 ? "selected" : ""}>${escapeHtml(v.version_id)}</option>`
+        ).join("");
+        diffA.innerHTML = versions.map((v, idx) =>
+          `<option value="${v.version_number}" ${idx === Math.min(1, versions.length - 1) ? "selected" : ""}>${escapeHtml(v.version_id)}</option>`
+        ).join("");
+      }
+
+      // 3. Active Version Canvas & Copy Editor
+      const adCopy = activeVer.ad_copy || {};
+      const visualAsset = activeVer.visual_asset || {};
+
+      if (visualAsset.svg_data_uri) {
+        document.getElementById("nanoBananaPreviewImg").src = visualAsset.svg_data_uri;
+      }
+      document.getElementById("visualAspectBadge").textContent = visualAsset.aspect_ratio || "1:1";
+      document.getElementById("visualModelBadge").textContent = visualAsset.model || "gemini-3.1-flash-image-preview";
+      document.getElementById("compositionNotesBox").textContent = visualAsset.composition_notes || "Layered Nano Banana vector & multimodal composition.";
+      document.getElementById("brandScoreBadge").textContent = `Brand Alignment: ${adCopy.brand_voice_score || 96}%`;
+
+      // Palette Swatches
+      const palette = visualAsset.palette || ["#38BDF8", "#FACC15", "#0F172A"];
+      document.getElementById("paletteSwatchList").innerHTML = palette.map(hex => `
+        <span class="swatch-chip">
+          <span class="swatch-dot" style="background:${escapeHtml(hex)};"></span>
+          <span>${escapeHtml(hex)}</span>
+        </span>
+      `).join("");
+
+      // Update editable text inputs only when switching version/campaign or if not focused
+      const activeEl = document.activeElement;
+      if (refreshEditorFields || (activeEl && !["headlineField", "subheadlineField", "primaryTextField", "ctaField", "visualPromptField"].includes(activeEl.id))) {
+        document.getElementById("headlineField").value = adCopy.headline || "";
+        document.getElementById("subheadlineField").value = adCopy.subheadline || "";
+        document.getElementById("primaryTextField").value = adCopy.primary_text || "";
+        document.getElementById("ctaField").value = adCopy.cta_text || "";
+        document.getElementById("visualPromptField").value = visualAsset.visual_prompt || "";
+      }
+
+      // Channel Variations
+      const channels = adCopy.channel_variations || {};
+      const channelKeys = Object.keys(channels);
+      if (channelKeys.length > 0 && !channels[activeChannelKey]) {
+        activeChannelKey = channelKeys[0];
+      }
+      const channelLabels = {
+        instagram_reel: "Instagram Reel / Story",
+        linkedin_sponsored: "LinkedIn Sponsored",
+        google_display: "Google Display",
+        email_hero: "Email Hero"
+      };
+      document.getElementById("channelPillsBar").innerHTML = channelKeys.map(k => `
+        <button class="channel-pill ${k === activeChannelKey ? "active" : ""}" onclick="selectChannelVariation('${escapeHtml(k)}')">
+          ${escapeHtml(channelLabels[k] || k)}
+        </button>
+      `).join("");
+      document.getElementById("channelVariationContent").textContent = channels[activeChannelKey] || "No channel variation available.";
+
+      // Gemini Omni Multimodal Insights
+      const insights = adCopy.omni_insights || [];
+      document.getElementById("omniInsightsList").innerHTML = insights.map(item =>
+        `<li>${escapeHtml(item)}</li>`
+      ).join("");
+
+      // 4. Reference Assets & Campaign Brief
+      const brief = state.campaign || {};
+      document.getElementById("briefProductTitle").textContent = `${brief.title || ""} — ${brief.product_name || ""}`;
+      document.getElementById("briefAudienceText").textContent = `Target Audience: ${brief.target_audience || ""}`;
+      document.getElementById("briefBrandNotes").textContent = `Brand Guidelines: ${brief.brand_guidelines || ""}`;
+
+      const refs = state.references || [];
+      document.getElementById("refCountChip").textContent = refs.length;
+      document.getElementById("referenceGalleryGrid").innerHTML = refs.length === 0
+        ? `<div style="color:var(--text-muted);font-size:12px;">No reference images or briefs uploaded yet. Upload an image or brief on the left to ground Gemini Omni & Nano Banana.</div>`
+        : refs.map(r => `
+          <div class="ref-card">
+            <div class="ref-thumb">
+              ${r.data_uri && r.asset_type === "image"
+                ? `<img src="${r.data_uri}" alt="${escapeHtml(r.filename)}" />`
+                : `<div style="padding:8px;font-size:11px;color:var(--text-secondary);overflow:hidden;">📄 ${escapeHtml((r.extracted_notes || r.filename).slice(0, 120))}</div>`
+              }
+            </div>
+            <div style="font-weight:600;font-size:12px;display:flex;justify-content:space-between;align-items:center;">
+              <span>${escapeHtml(r.filename)}</span>
+              <span class="pill-badge pill-omni">${escapeHtml(r.asset_type)}</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-secondary);">${escapeHtml((r.extracted_notes || "").slice(0, 110))}</div>
+            <div class="mono" style="font-size:10px;color:#4ade80;word-break:break-all;">${escapeHtml(r.gcs_uri || "")}</div>
+          </div>
+        `).join("");
+
+      // 5. Version History List
+      document.getElementById("versionHistoryList").innerHTML = versions.map(v => {
+        const isCurrent = v.version_number === activeVer.version_number;
+        const dl = v.download_urls || {};
+        return `
+          <div class="version-row ${isCurrent ? "active-version" : ""}">
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-weight:700;font-size:13px;">${escapeHtml(v.version_id)}</span>
+                ${isCurrent ? `<span class="pill-badge pill-omni">Active in Studio</span>` : ""}
+                <span style="font-size:11px;color:var(--text-secondary);">${escapeHtml(v.created_at || "")}</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-primary);">${escapeHtml(v.summary || "")}</div>
+              <div class="mono" style="font-size:10.5px;color:#4ade80;">${escapeHtml(v.gcs_uri || "")}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-outline btn-sm" onclick="loadSpecificVersion(${v.version_number})">
+                👁 View
+              </button>
+              ${!isCurrent ? `
+                <button class="btn btn-primary btn-sm" onclick="restoreSpecificVersion(${v.version_number})">
+                  ⏪ Restore as Latest
+                </button>
+              ` : ""}
+              ${dl.ad_copy_md ? `<button class="btn btn-outline btn-sm" onclick="openExternalOrDownloadLink('${escapeHtml(dl.ad_copy_md)}')">⬇ Copy .md</button>` : ""}
+              ${dl.creative_svg ? `<button class="btn btn-outline btn-sm" onclick="openExternalOrDownloadLink('${escapeHtml(dl.creative_svg)}')">⬇ SVG</button>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // 6. Active & Recent Jobs + Banner + Toast Notifications
+      const jobs = state.jobs || [];
+      const runningJobs = jobs.filter(j => j.status === "queued" || j.status === "running");
+      document.getElementById("jobCountChip").textContent = runningJobs.length > 0 ? `${runningJobs.length} Running` : jobs.length;
+
+      const banner = document.getElementById("activeJobBanner");
+      if (runningJobs.length > 0) {
+        const topJob = runningJobs[0];
+        banner.classList.add("active");
+        document.getElementById("activeJobTitle").textContent = `${topJob.title} (${topJob.model_omni} + ${topJob.model_banana})`;
+        document.getElementById("activeJobStage").textContent = topJob.stage_message || "Processing...";
+        document.getElementById("activeJobIdLabel").textContent = topJob.job_id;
+        document.getElementById("activeJobPctLabel").textContent = `${topJob.progress_pct || 0}%`;
+        document.getElementById("activeJobProgressBar").style.width = `${topJob.progress_pct || 10}%`;
+      } else {
+        banner.classList.remove("active");
+      }
+
+      document.getElementById("jobsListContainer").innerHTML = jobs.length === 0
+        ? `<div style="color:var(--text-muted);font-size:12px;">No backend jobs launched yet. Click "Generate with Gemini Omni + Nano Banana" to start an async job.</div>`
+        : jobs.map(j => `
+          <div class="job-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-weight:700;font-size:12.5px;">${escapeHtml(j.title)}</div>
+              <span class="status-badge status-${escapeHtml(j.status)}">${escapeHtml(j.status)} (${j.progress_pct || 0}%)</span>
+            </div>
+            <div style="font-size:11.5px;color:var(--text-secondary);">${escapeHtml(j.stage_message || "")}</div>
+            <div class="job-progress-bar-bg">
+              <div class="job-progress-bar-fill" style="width:${j.progress_pct || 0}%;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--text-muted);" class="mono">
+              <span>ID: ${escapeHtml(j.job_id)}</span>
+              <span>${j.result_version ? `Saved → ${escapeHtml(j.result_version.version_id)} (${escapeHtml(j.result_version.gcs_uri || "")})` : escapeHtml(j.updated_at || "")}</span>
+            </div>
+          </div>
+        `).join("");
+
+      const unread = state.unread_notifications || [];
+      renderNotifications(unread);
+    }
+
+    function renderNotifications(unreadList) {
+      const container = document.getElementById("notificationsListContainer");
+      container.innerHTML = unreadList.length === 0
+        ? `<div style="color:var(--text-muted);font-size:12px;">All job notifications acknowledged.</div>`
+        : unreadList.map(n => `
+          <div class="job-card" style="border-left:3px solid var(--accent-primary);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-weight:700;">${escapeHtml(n.title)}</span>
+              <button class="btn btn-outline btn-sm" onclick="dismissNotification('${escapeHtml(n.notification_id)}')">Dismiss</button>
+            </div>
+            <div style="font-size:11.5px;color:var(--text-secondary);">${escapeHtml(n.message)}</div>
+            <div class="mono" style="font-size:10px;color:var(--text-muted);">${escapeHtml(n.created_at || "")}</div>
+          </div>
+        `).join("");
+
+      // Show floating toast for new unread notifications
+      const toastStack = document.getElementById("toastStack");
+      unreadList.forEach(n => {
+        if (seenToastIds.has(n.notification_id)) return;
+        seenToastIds.add(n.notification_id);
+        const toast = document.createElement("div");
+        toast.className = "toast-item";
+        toast.id = `toast-${n.notification_id}`;
+        toast.innerHTML = `
+          <div>
+            <div style="font-weight:700;font-size:12px;margin-bottom:2px;">🔔 ${escapeHtml(n.title)}</div>
+            <div style="font-size:11px;color:var(--text-secondary);">${escapeHtml(n.message)}</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="dismissNotification('${escapeHtml(n.notification_id)}')">✕</button>
+        `;
+        toastStack.appendChild(toast);
+        setTimeout(() => {
+          if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 7500);
+      });
+    }
+
+    /*************************************************************************
+     * 4. USER INTERACTIONS & ASYNC POLLING
+     *************************************************************************/
+    function startAdaptivePolling() {
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(async () => {
+        if (!studioState || !studioState.campaign_id) return;
+        const hasActiveJob = (studioState.jobs || []).some(j => j.status === "queued" || j.status === "running");
+        if (hasActiveJob) {
+          await callMcpTool("get_studio_state", { campaign_id: studioState.campaign_id });
+        }
+      }, 1600);
+    }
+
+    window.selectChannelVariation = function(channelKey) {
+      activeChannelKey = channelKey;
+      if (studioState) renderStudioState(studioState, false);
+    };
+
+    window.loadSpecificVersion = async function(versionNum) {
+      if (!studioState) return;
+      const res = await callMcpTool("get_content_version", {
+        campaign_id: studioState.campaign_id,
+        version_number: Number(versionNum)
+      });
+      if (res && res.version && studioState) {
+        studioState.active_version = res.version;
+        renderStudioState(studioState, true);
+        switchTab("studio");
+        pushModelContextUpdate(`User is viewing version v${versionNum} of campaign ${studioState.campaign_id} (${res.version.gcs_uri}).`);
+      }
+    };
+
+    window.restoreSpecificVersion = async function(versionNum) {
+      if (!studioState) return;
+      await callMcpTool("restore_content_version", {
+        campaign_id: studioState.campaign_id,
+        version_number: Number(versionNum)
+      });
+      pushModelContextUpdate(`Restored version v${versionNum} as the latest version in GCS for campaign ${studioState.campaign_id}.`);
+    };
+
+    window.dismissNotification = async function(notificationId) {
+      if (!studioState) return;
+      const toastEl = document.getElementById(`toast-${notificationId}`);
+      if (toastEl && toastEl.parentNode) toastEl.parentNode.removeChild(toastEl);
+      await callMcpTool("acknowledge_job_notification", {
+        campaign_id: studioState.campaign_id,
+        notification_id: notificationId
+      });
+    };
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === tabId);
+      });
+      document.querySelectorAll(".tab-pane").forEach(pane => {
+        pane.classList.toggle("active", pane.id === `tab-${tabId}`);
+      });
+    }
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+    });
+
+    // Campaign Switcher
+    document.getElementById("campaignSelect").addEventListener("change", async (e) => {
+      const nextId = e.target.value;
+      await callMcpTool("get_studio_state", { campaign_id: nextId });
+      pushModelContextUpdate(`Switched Acme Creative Studio to campaign ${nextId}.`);
+    });
+
+    // Quick Version Selector
+    document.getElementById("versionQuickSelect").addEventListener("change", async (e) => {
+      await window.loadSpecificVersion(Number(e.target.value));
+    });
+
+    // Display Mode Toggle (PiP <-> Fullscreen)
+    document.getElementById("btnToggleDisplayMode").addEventListener("click", async () => {
+      const nextMode = currentDisplayMode === "fullscreen" ? "pip" : "fullscreen";
+      currentDisplayMode = nextMode;
+      await sendRpcRequest("ui/request-display-mode", { mode: nextMode }).catch(() => {});
+    });
+
+    // Launch Gemini Omni + Nano Banana Async Generation Job
+    async function triggerGenerationJob(customPrompt) {
+      if (!studioState) return;
+      const promptInput = document.getElementById("creativePromptInput");
+      const promptText = customPrompt || promptInput.value.trim() || "Create a high-impact Acme Inc. multimodal ad variation grounded in the active brand references.";
+      const aspectRatio = document.getElementById("aspectRatioSelect").value;
+      const tone = document.getElementById("toneSelect").value;
+
+      await callMcpTool("create_ad_campaign_job", {
+        campaign_id: studioState.campaign_id,
+        creative_prompt: promptText,
+        aspect_ratio: aspectRatio,
+        tone_override: tone
+      });
+      promptInput.value = "";
+      pushModelContextUpdate(`Started async Gemini Omni + Nano Banana job for ${studioState.campaign_id}: "${promptText}" (${aspectRatio}).`);
+    }
+
+    document.getElementById("btnGenerateCreative").addEventListener("click", () => triggerGenerationJob());
+    document.getElementById("btnRegenerateWithRefs").addEventListener("click", () => {
+      switchTab("studio");
+      triggerGenerationJob("Re-synthesize ad copy and Nano Banana visual creative incorporating all newly uploaded GCS reference images and brand brief notes.");
+    });
+
+    // Save Interactive Copy Edits as New GCS Version
+    document.getElementById("btnSaveCopyVersion").addEventListener("click", async () => {
+      if (!studioState) return;
+      const headline = document.getElementById("headlineField").value.trim();
+      const subheadline = document.getElementById("subheadlineField").value.trim();
+      const primary_text = document.getElementById("primaryTextField").value.trim();
+      const cta_text = document.getElementById("ctaField").value.trim();
+      const visual_prompt = document.getElementById("visualPromptField").value.trim();
+      const edit_notes = document.getElementById("editNotesField").value.trim() || "Interactive studio copy & visual refinement";
+
+      await callMcpTool("refine_ad_copy_job", {
+        campaign_id: studioState.campaign_id,
+        headline,
+        subheadline,
+        primary_text,
+        cta_text,
+        visual_prompt,
+        edit_notes
+      });
+      document.getElementById("editNotesField").value = "";
+      pushModelContextUpdate(`Saved new GCS content version for ${studioState.campaign_id} with headline "${headline}".`);
+    });
+
+    // Download SVG & Bundle buttons
+    document.getElementById("btnDownloadSvg").addEventListener("click", () => {
+      const dl = studioState && studioState.active_version && studioState.active_version.download_urls;
+      if (dl && dl.creative_svg) openExternalOrDownloadLink(dl.creative_svg);
+    });
+
+    document.getElementById("btnDownloadBundle").addEventListener("click", () => {
+      const dl = studioState && studioState.active_version && studioState.active_version.download_urls;
+      if (dl && dl.bundle_json) openExternalOrDownloadLink(dl.bundle_json);
+    });
+
+    // File Upload Dropzone (Images & Content Briefs)
+    const dropzone = document.getElementById("uploadDropzone");
+    const fileInput = document.getElementById("referenceFileInput");
+
+    dropzone.addEventListener("click", () => fileInput.click());
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleReferenceFileUpload(e.dataTransfer.files[0]);
+      }
+    });
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleReferenceFileUpload(e.target.files[0]);
+      }
+    });
+
+    function handleReferenceFileUpload(file) {
+      if (!file || !studioState) return;
+      const isImage = file.type.startsWith("image/");
+      const reader = new FileReader();
+      reader.onload = async () => {
+        if (isImage) {
+          await callMcpTool("upload_reference_asset", {
+            campaign_id: studioState.campaign_id,
+            filename: file.name,
+            content_type: file.type || "image/png",
+            data_uri: reader.result,
+            notes: `Uploaded reference image (${file.name}, ${Math.round(file.size / 1024)} KB) for Nano Banana visual grounding.`
+          });
+        } else {
+          await callMcpTool("upload_reference_asset", {
+            campaign_id: studioState.campaign_id,
+            filename: file.name,
+            content_type: file.type || "text/markdown",
+            text_content: String(reader.result || ""),
+            notes: `Uploaded reference content document (${file.name})`
+          });
+        }
+        pushModelContextUpdate(`Uploaded reference asset ${file.name} to GCS for campaign ${studioState.campaign_id}.`);
+      };
+      if (isImage) {
+        reader.readAsDataURL(file);
+      } else {
+        reader.readAsText(file);
+      }
+    }
+
+    document.getElementById("btnUploadTextRef").addEventListener("click", async () => {
+      if (!studioState) return;
+      const filename = document.getElementById("refNameInput").value.trim() || "brand_reference_note.md";
+      const textContent = document.getElementById("refContentInput").value.trim();
+      if (!textContent) return;
+
+      await callMcpTool("upload_reference_asset", {
+        campaign_id: studioState.campaign_id,
+        filename,
+        content_type: "text/markdown",
+        text_content: textContent,
+        notes: textContent.slice(0, 200)
+      });
+      document.getElementById("refNameInput").value = "";
+      document.getElementById("refContentInput").value = "";
+      pushModelContextUpdate(`Added reference note ${filename} to GCS for campaign ${studioState.campaign_id}.`);
+    });
+
+    // Version Diff Comparison
+    document.getElementById("btnRunDiff").addEventListener("click", async () => {
+      if (!studioState) return;
+      const verA = Number(document.getElementById("diffVersionASelect").value);
+      const verB = Number(document.getElementById("diffVersionBSelect").value);
+      const res = await callMcpTool("compare_content_versions", {
+        campaign_id: studioState.campaign_id,
+        version_a: verA,
+        version_b: verB
+      });
+      if (!res || !res.comparison) return;
+      const comp = res.comparison;
+      const fieldsContainer = document.getElementById("diffFieldsSummary");
+      const changes = comp.field_changes || [];
+      fieldsContainer.innerHTML = changes.length === 0
+        ? `<div style="font-size:12px;color:var(--text-secondary);">No field differences between v${verA} and v${verB}.</div>`
+        : changes.map(c => `
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;">
+            <div style="font-weight:700;font-size:11.5px;color:var(--accent-primary);margin-bottom:4px;">Field: ${escapeHtml(c.field)}</div>
+            <div style="font-size:11px;color:#f87171;">- v${verA}: ${escapeHtml(c.version_a || "")}</div>
+            <div style="font-size:11px;color:#4ade80;">+ v${verB}: ${escapeHtml(c.version_b || "")}</div>
+          </div>
+        `).join("");
+
+      const unifiedLines = (comp.unified_diff || "No markdown diff.").split("\n");
+      document.getElementById("diffUnifiedOutput").innerHTML = unifiedLines.map(line => {
+        if (line.startsWith("+") && !line.startsWith("+++")) {
+          return `<span class="diff-line-add">${escapeHtml(line)}</span>`;
+        }
+        if (line.startsWith("-") && !line.startsWith("---")) {
+          return `<span class="diff-line-del">${escapeHtml(line)}</span>`;
+        }
+        return `<span>${escapeHtml(line)}\n</span>`;
+      }).join("");
+    });
+
+    // Jobs & Notifications buttons
+    document.getElementById("btnRefreshJobs").addEventListener("click", async () => {
+      if (!studioState) return;
+      await callMcpTool("get_studio_state", { campaign_id: studioState.campaign_id });
+    });
+
+    document.getElementById("btnAckAllNotifications").addEventListener("click", async () => {
+      if (!studioState) return;
+      await callMcpTool("acknowledge_job_notification", { campaign_id: studioState.campaign_id });
+    });
+
+    function escapeHtml(str) {
+      return String(str === undefined || str === null ? "" : str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    // Boot Studio
+    window.addEventListener("DOMContentLoaded", initMcpAppBridge);
+  </script>
+</body>
+</html>

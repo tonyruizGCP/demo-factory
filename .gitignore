@@ -11,3 +11,4 @@ dist/
 build/
 .worktrees/
 .agents/
+.gcs_local_mirror/

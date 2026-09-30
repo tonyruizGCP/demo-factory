@@ -101,6 +101,48 @@ PRESET_USE_CASES = {
             "SAFETY_GUARDRAILS": 1.0,
             "TOKEN_EFFICIENCY": 0.89
         }
+    },
+    "acme_creative_studio": {
+        "title": "Acme Inc. Creative Studio — Gemini Omni + Nano Banana MCP App",
+        "tech": "Gemini Enterprise MCP App (ui://acme/creative-studio) + Gemini Omni + Nano Banana + GCS Versioning",
+        "response": "Opened Acme Inc. Creative Studio MCP App (ui://acme/creative-studio). Uploaded reference product image & brand brief to gs://truiz-agy-demo-acme-creative-studio-assets/campaigns/acme_trailblazer_x1/references/, executed async job job_omni_banana_01 with Gemini Omni + Nano Banana, notified the user, and saved immutable content version v2 to GCS.",
+        "thoughts": [
+            "Perceive Goal: Launch interactive Acme Inc. Creative Studio MCP App in Gemini Enterprise for multimodal ad copy & visual creation",
+            "Context Check: Validate AGENTS.md rules (never route to canvas_agent, return async job in <2s, persist immutable versions to GCS)",
+            "Act: Invoke MCP tool 'open_creative_studio' with multi-dialect _meta.ui (ui://acme/creative-studio, preferredMode='pip')",
+            "Act: Invoke MCP tool 'upload_reference_asset' to store reference image & brand brief in GCS",
+            "Act: Invoke MCP tool 'create_ad_campaign_job' to spawn async Gemini Omni + Nano Banana background pipeline",
+            "Observe: Poll 'get_studio_state' / 'get_job_status' (queued -> running -> completed 100%) and emit toast notification",
+            "Verify: Inspect & diff GCS content versions v1 vs v2 via 'compare_content_versions'"
+        ],
+        "tool_calls": [
+            {
+                "tool_name": "open_creative_studio",
+                "arguments": {"campaign_id": "acme_trailblazer_x1"},
+                "result": {"resourceUri": "ui://acme/creative-studio", "preferredMode": "pip", "active_version": "v1"}
+            },
+            {
+                "tool_name": "upload_reference_asset",
+                "arguments": {"campaign_id": "acme_trailblazer_x1", "filename": "trailblazer_hero_ref.svg", "asset_type": "image"},
+                "result": {"status": "uploaded", "gcs_uri": "gs://truiz-agy-demo-acme-creative-studio-assets/campaigns/acme_trailblazer_x1/references/trailblazer_hero_ref.svg"}
+            },
+            {
+                "tool_name": "create_ad_campaign_job",
+                "arguments": {"campaign_id": "acme_trailblazer_x1", "creative_prompt": "Add 25% launch offer badge & golden-hour alpine ridge lighting", "aspect_ratio": "16:9"},
+                "result": {"job_id": "job_omni_banana_01", "status": "completed", "progress_pct": 100, "result_version": "v2"}
+            },
+            {
+                "tool_name": "compare_content_versions",
+                "arguments": {"campaign_id": "acme_trailblazer_x1", "base_version_id": "v1", "target_version_id": "v2"},
+                "result": {"changed_fields_count": 5, "bundle_gcs_uri": "gs://truiz-agy-demo-acme-creative-studio-assets/campaigns/acme_trailblazer_x1/versions/v2/bundle.json"}
+            }
+        ],
+        "eval_scores": {
+            "FINAL_RESPONSE_QUALITY": 0.99,
+            "TRAJECTORY_COMPLIANCE": 1.0,
+            "SAFETY_GUARDRAILS": 1.0,
+            "TOKEN_EFFICIENCY": 0.95
+        }
     }
 }
 
