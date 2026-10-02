@@ -1,6 +1,6 @@
-"""Generates comprehensive per-chapter README.md guides with layman explanations, metaphors,
-terminology glossaries, Nano Banana concept visuals, chart walkthroughs, and deeper reading references,
-and enriches the Jupyter notebooks with the same layman context and references.
+r"""Generates comprehensive per-chapter README.md guides with layman explanations, metaphors,
+Agentic Hill-Climbing relevance, terminology glossaries, Nano Banana concept visuals, chart walkthroughs,
+and deeper reading references, and enriches the Jupyter notebooks with the same context.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ CHAPTER_SPECS = [
             "against the production consistency metric (`Pass^k`, all `k` trials succeed)."
         ),
         "metaphor_title": "The Blindfolded Dart Thrower vs. The Precision Archer",
-        "layman_explanation": """Imagine you are hiring an archer to protect a castle, and you give two candidates **5 arrows** each:
+        "layman_explanation": r"""Imagine you are hiring an archer to protect a castle, and you give two candidates **5 arrows** each:
 
 - **Candidate A (The Lucky Gambler — Measured by `Pass@k`)**: Throws 5 arrows wildly while spinning around. Four arrows fly into the stands, and **one lucky arrow hits the bullseye**. If your grading rule is *"Did at least one arrow out of 5 hit the target?"* (`Pass@5`), Candidate A gets a **100% score!**
 - **Candidate B (The Precision Master — Measured by `Pass^k`)**: Calmly aims and lands **all 5 arrows** tightly inside the bullseye ring every single time. If your grading rule is *"Did ALL 5 arrows hit the target without a single miss?"* (`Pass^5`), only Candidate B passes.
@@ -35,6 +35,13 @@ CHAPTER_SPECS = [
 Large Language Models (LLMs) are **stochastic** (non-deterministic)—even with the exact same prompt, slight sampling randomness or tool-timing differences can cause an agent to take a different reasoning path on each run:
 - **`Pass@k` ("Try-Until-You-Win")** is great when you have an automated verifier—for example, an AI coding assistant that generates 5 candidate patches, runs your unit test suite on all 5, and only shows the user the 1 patch that passed.
 - **`Pass^k` ("Zero-Defect Consistency")** is essential when an agent interacts directly with a live customer, executes a financial transaction, or modifies a database where **there is no undo button**. An agent that succeeds 75% of the time on 1 try (`Pass@1 = 75%`) will succeed 5 times in a row only $0.75^5 \approx 23.7\%$ of the time (`Pass^5 = 23.7%`)!""",
+        "hill_climbing_role": "Stage 1 — Defining the Hill's Objective Function (Climbing True Altitude vs. Climbing Noise)",
+        "hill_climbing_explanation": r"""In **Agentic Hill-Climbing**, an automated optimizer iteratively mutates your system prompt or tool definitions, scores the candidate against your benchmark, and keeps the mutation if the score goes up. **The metric you choose defines the "altitude" of the hill:**
+
+- **What Breaks Without It (Climbing Execution Noise)**: If your hill-climber evaluates each prompt mutation using only a single seed (`Pass@1`) or optimizes `Pass@k` for a customer-facing agent, the optimizer will **mistake a lucky coin flip for a genuine improvement**. In our simulation, a chaotic/high-variance prompt gets lucky on a single run (`Pass@1 = 76%`) and tricks the hill-climber into replacing a rock-solid baseline (`Pass@1 = 74%`). Beneath the surface, that "upgrade" caused 5-run reliability (`Pass^5`) to crash from **66% down to 26%**!
+- **How It Supercharges the Hill-Climber**:
+  1. **Multi-Seed Evaluation ($n$ seeds per task)** smooths out trajectory variance so the hill-climber doesn't chase phantom 2% bumps caused by random LLM sampling.
+  2. **Objective Alignment**: Using $\widehat{\text{Pass}@k}$ when hill-climbing a **verifier-backed coding harness** (where best-of-$k$ sampling is used at inference time) versus $\widehat{\text{Pass}^k}$ when hill-climbing an **autonomous transactional agent** guarantees that every accepted step up the hill improves real production reliability.""",
         "glossary": [
             ("Stochasticity", "Randomness in how an agent behaves from run to run, even when given the exact same task and prompt."),
             ("Seed / Trial ($n$)", "One complete, independent attempt by the agent to solve a task from start to finish."),
@@ -76,7 +83,7 @@ Large Language Models (LLMs) are **stochastic** (non-deterministic)—even with 
             "reward-hacking mutations."
         ),
         "metaphor_title": "Memorizing the Practice Exam Answer Key vs. Learning the Subject",
-        "layman_explanation": """Suppose a teacher wants to know if students truly understand algebra. They create a 100-question test, hand the exact questions and answer key to the class on Monday, and let students practice on that exact sheet 30 times before Friday.
+        "layman_explanation": r"""Suppose a teacher wants to know if students truly understand algebra. They create a 100-question test, hand the exact questions and answer key to the class on Monday, and let students practice on that exact sheet 30 times before Friday.
 
 By Friday, a student might score **95%** simply by memorizing rules like *"Whenever a question mentions a red train, the answer is 42"*—without knowing how to solve a single equation! The moment you give that student a **fresh exam locked in a vault** with slightly different word problems, their score crashes back to **52%**.
 
@@ -84,6 +91,13 @@ By Friday, a student might score **95%** simply by memorizing rules like *"Whene
 In modern AI engineering, developers (and automated prompt optimizers like DSPy or OPRO) tweak a system prompt 20 to 50 times in a row against a benchmark dataset:
 - **Goodhart's Law**: *"When a measure becomes a target, it ceases to be a good measure."* If you look at the errors on your 120 test tasks and add hyper-specific rules to your prompt (*"If the user asks about SQL table `orders_v2`, always join on `cust_id`"*), your score on those 120 tasks goes up, but your prompt gets bloated, brittle, and worse at everything else.
 - **The Stratified Holdout Gate**: By splitting your benchmark into an **Optimization Set (60%)** that you can inspect freely and a **Locked Holdout Vault (40%)** with the exact same mix of task difficulties and skills, an automated gate can immediately reject "cheat-sheet" prompt edits that don't generalize.""",
+        "hill_climbing_role": "Stage 2 — The Anti-Goodharting Circuit Breaker (`HOLDOUT_GATE` & Stratified Partitioning)",
+        "hill_climbing_explanation": r"""**Agentic Hill-Climbing** is, by definition, an iterative search loop that repeatedly queries a benchmark to improve a prompt or harness. Because LLM prompts have virtually infinite degrees of freedom (you can append arbitrary natural-language instructions), **hill-climbers are extraordinarily prone to overfitting**:
+
+- **What Breaks Without It (Reward Hacking & Prompt Bloat)**: When an autonomous hill-climber (or human engineer) inspects failed trajectories on the training set and proposes 30 sequential prompt mutations, it quickly discovers **benchmark-specific shortcuts**—hardcoding edge-case answers, overfitting to specific test phrasing, or adding conflicting `CRITICAL: NEVER DO X` rules. In our simulation, after **Step 9**, ungated hill-climbing continues pushing the Optimization score above **91%**, while true performance on unseen tasks collapses to **52%**!
+- **How It Supercharges the Hill-Climber**:
+  1. **Jointly Stratified Splitting (`Difficulty × Capability`)** guarantees that rare, high-difficulty task slices (e.g., `Hard × code_execution`) are equally represented in both the Optimization climb set and the Holdout vault—preventing the hill-climber from gaming easy tasks.
+  2. **Automated `HoldoutGate` Enforcement**: Before any candidate mutation is promoted as the new baseline in the hill-climbing state machine, it must pass the `HoldoutGate` ($\Delta \hat{R}_{\text{hold}} \ge 0$ and generalization gap $\hat{R}_{\text{opt}} - \hat{R}_{\text{hold}} \le \gamma_{\max}$). Overfit mutations are automatically rejected and rolled back, sustaining a clean **75%+ true generalization plateau**.""",
         "glossary": [
             ("Goodhart's Law", "The principle that once you relentlessly optimize directly for a specific test score, that score stops reflecting real-world quality."),
             ("Overfitting / Reward Hacking", "Adding brittle, overly specific rules or shortcuts to a prompt that boost scores on known test cases while hurting performance on new tasks."),
@@ -99,7 +113,7 @@ In modern AI engineering, developers (and automated prompt optimizers like DSPy 
   A candidate prompt mutation is accepted if and only if it improves the optimization set by at least $\tau_{\text{opt}}$, does not regress on the holdout set, and keeps the generalization gap below $\gamma_{\max}$:
   $$\Delta \hat{R}_{\text{opt}} \ge \tau_{\text{opt}} \quad \wedge \quad \Delta \hat{R}_{\text{hold}} \ge 0 \quad \wedge \quad (\hat{R}_{\text{opt}} - \hat{R}_{\text{hold}}) \le \gamma_{\max}$$""",
         "highlights": [
-            "Generates 200 synthetic benchmark tasks across 9 difficulty $\\times$ capability strata and splits them 60% Optimization ($n=120$) / 40% Holdout ($n=80$).",
+            "Generates 200 synthetic benchmark tasks across 9 difficulty $\\times$ capability strata and splits them 60% Optimization ($n=120$) / 40% Holdout ($n=180$).",
             "Simulates 30 sequential prompt mutations mixing genuine capability improvements with benchmark-quirk reward hacking.",
             "Pinpoints the exact **Overfitting Divergence Step** where ungated optimization climbs to >90% on the Optimization set while collapsing to ~52% on unseen Holdout tasks.",
         ],
@@ -126,7 +140,7 @@ In modern AI engineering, developers (and automated prompt optimizers like DSPy 
             "`Wilcoxon Signed-Rank Test` for skewed token/latency metrics) alongside statistical power analysis."
         ),
         "metaphor_title": "Testing Running Shoes on the Exact Same Obstacle Course vs. Different Mountains",
-        "layman_explanation": """Imagine you want to know if a new running shoe (**Shoe B**) makes runners 5% faster than the old shoe (**Shoe A**):
+        "layman_explanation": r"""Imagine you want to know if a new running shoe (**Shoe B**) makes runners 5% faster than the old shoe (**Shoe A**):
 
 - **The Unpaired Way (Two-Sample $Z$-Test)**: You send 100 people wearing Shoe A up a steep, rocky mountain in the rain, and 100 different people wearing Shoe B down a flat paved track in the sun. Because the terrain (task difficulty) varies wildly from person to person, the "terrain noise" drowns out the 5% shoe difference. You would need **1,375 runners per group** to be sure!
 - **The Paired Way (McNemar's Test)**: You have the **exact same runner** run the **exact same obstacle block** once in Shoe A and once in Shoe B.
@@ -136,6 +150,15 @@ In modern AI engineering, developers (and automated prompt optimizers like DSPy 
 
 ### Why This Matters for AI Agents
 In agent benchmarks, running both your Baseline Agent and Candidate Agent on the **exact same list of benchmark tasks** is free! By using **McNemar's Paired Test** instead of a standard unpaired A/B calculator, you cancel out task-difficulty noise and need **9.5x fewer evaluation tasks** (145 tasks instead of 1,375) to prove a 5% improvement with 80% statistical power!""",
+        "hill_climbing_role": "Stage 3 — High-Sensitivity Step Verification (Detecting Incremental $+3\%$ to $+5\%$ Lifts)",
+        "hill_climbing_explanation": r"""In **Agentic Hill-Climbing**, individual prompt or tool mutations rarely jump accuracy by $+30\%$ in a single bound; real progress happens through **steady $+3\%$ to $+5\%$ incremental steps** compounded over 10–20 iterations. This creates a massive statistical dilemma at every step of the climb:
+
+- **What Breaks Without It (Blind Drift or 10x Compute Bloat)**:
+  - If you use an **unpaired 2-sample $Z$-test** to verify whether a $+5\%$ candidate mutation is statistically significant ($p < 0.05$ at $80\%$ power), task-difficulty variance forces you to run **~1,375 tasks per candidate**—making a 25-step hill-climb cost over **34,000 task evaluations**!
+  - Conversely, if you only run 150 tasks *without* paired testing, your statistical power drops below **15%**, meaning the hill-climber rejects 85% of genuinely good mutations and wanders randomly!
+- **How It Supercharges the Hill-Climber**:
+  1. **McNemar's Paired Test on Discordant Tasks ($b$ vs. $c$)** conditions on exact task IDs, canceling out shared task-difficulty variance and achieving $80\%$ power in **~145 paired tasks (a 9.5x reduction in sample size per hill-climbing step)**.
+  2. **Wilcoxon Signed-Rank Guardrail for Cost/Latency**: Ensures a candidate prompt that passes McNemar's accuracy test isn't secretly achieving that lift by exploding median token consumption or getting stuck in heavy-tailed retry loops.""",
         "glossary": [
             ("Statistical Power ($1 - \\beta$)", "The probability (typically set to 80%) that your experiment will successfully detect a real improvement if one actually exists."),
             ("Significance Level ($\\alpha$)", "The false-positive risk (typically 5%, or $p < 0.05$)—the chance of claiming a prompt is better when it was just a lucky coin flip."),
@@ -178,13 +201,21 @@ In agent benchmarks, running both your Baseline Agent and Candidate Agent on the
             "quadratic overthinking decay, and parameter interaction synergies."
         ),
         "metaphor_title": "Tuning an Espresso Machine & Avoiding the 'Overthinking Cliff'",
-        "layman_explanation": """Imagine tuning three dials on a high-end espresso machine—**Water Temperature**, **Grind Size**, and **Brew Pressure**—or adjusting dials on a studio mixing board:
+        "layman_explanation": r"""Imagine tuning three dials on a high-end espresso machine—**Water Temperature**, **Grind Size**, and **Brew Pressure**—or adjusting dials on a studio mixing board:
 
 1. **Diminishing Returns & The Overthinking Cliff (Quadratic Term $\beta_{T^2} < 0$)**: Adding a little more coffee or brewing a little longer makes the espresso richer. But if you keep turning the dial to the maximum, you burn the coffee! Similarly, giving an AI agent more **Thinking Budget** helps up to ~2,700 tokens, but beyond that, the agent enters **"analysis paralysis"** (second-guessing itself, hallucinating edge cases, and degrading accuracy).
 2. **Synergy Boost (Interaction Term $\beta_{TC} > 0$)**: What happens if you give an agent a massive **Thinking Budget** ($T$), but only 1 **Context Chunk** ($C$) of documentation? It has plenty of brainpower, but nothing to read! Conversely, if you dump 20 chunks of documentation into the prompt with almost zero thinking budget, it can't synthesize them. Only when you turn **both dials up together** ($T \times C$) do you unlock a synergy bonus.
 
 ### Why This Matters for AI Agents
 Most engineers tune one knob at a time ("Let's set `thinking_budget=4000` and see what happens"). One-at-a-time tuning misses interactions and wastes money on over-allocated tokens. **Response Surface Methodology (RSM)** maps the entire 3D mountain peak so you can find the exact mathematical sweet spot.""",
+        "hill_climbing_role": "Stage 4 — Multi-Knob Gradient Ascent & Interaction Attribution (Tuning the Continuous Harness)",
+        "hill_climbing_explanation": r"""**Agentic Hill-Climbing** isn't limited to editing prompt text—a major part of climbing an agent harness is tuning continuous system parameters (`thinking_budget`, `context_chunks` top-$k$, `temperature`, `tool_timeout`).
+
+- **What Breaks Without It (One-Factor-at-a-Time Blindness & Overthinking)**:
+  - **Missing Synergies**: If a hill-climber increases `context_chunks` from 5 to 15 while keeping `thinking_budget` stuck at 500 tokens, pass rate barely moves (or drops due to context overload), causing the hill-climber to falsely conclude *"more RAG context doesn't help."* It missed the positive **interaction term ($\beta_{TC} > 0$)**!
+  - **Climbing Over the Cliff**: Assuming *"more thinking tokens is always better"* leads hill-climbers to max out `thinking_budget=4000`, paying 50% more token cost while suffering **quadratic overthinking decay ($\beta_{T^2} < 0$)**.
+- **How It Supercharges the Hill-Climber**:
+  By fitting a **Second-Order Polynomial Response Surface** across past hill-climbing runs, the optimizer estimates the exact gradient vector and Hessian curvature matrix—allowing it to solve $\nabla \text{PassRate}(T^*, C^*) = \mathbf{0}$ and jump directly to the joint sweet spot (`~2,690 thinking tokens`, `~14.1 context chunks`).""",
         "glossary": [
             ("Response Surface Methodology (RSM)", "Fitting a smooth curved 3D surface (like a topographic mountain map) to experimental data so you can locate the highest performance peak."),
             ("Linear Effect ($\\beta_T, \\beta_C$)", "The initial upward slope—how much pass rate improves per unit when you first start increasing a knob."),
@@ -223,7 +254,7 @@ Most engineers tune one knob at a time ("Let's set `thinking_budget=4000` and se
             "to prune weak prompt candidates early and accept strong winners without running fixed $N=500$ sweeps."
         ),
         "metaphor_title": "The Restaurant Taste-Tester: Why Eat 500 Spoonfuls of Burnt Soup?",
-        "layman_explanation": """Imagine a chef testing 100 experimental soup recipes. In a rigid traditional evaluation (**Fixed-Horizon Testing**), the rule says: *"You must eat 500 spoonfuls of every single recipe before you are allowed to say whether it is good or bad."*
+        "layman_explanation": r"""Imagine a chef testing 100 experimental soup recipes. In a rigid traditional evaluation (**Fixed-Horizon Testing**), the rule says: *"You must eat 500 spoonfuls of every single recipe before you are allowed to say whether it is good or bad."*
 
 If Recipe #1 tastes like burnt rubber on the first 25 spoonfuls, why on earth would you force yourself to eat 475 more spoonfuls?! Conversely, if Recipe #99 is unmistakably delicious after 90 spoonfuls, you don't need 410 more to crown it a winner.
 
@@ -231,11 +262,18 @@ If Recipe #1 tastes like burnt rubber on the first 25 spoonfuls, why on earth wo
 Instead of waiting until Trial 500 to look at the score, **Bayesian Sequential Testing** maintains a living "belief curve" (**Beta Distribution**) for the Candidate and the Baseline after **every single task**:
 - At **Trial 0**, both curves are wide and flat (*"We know nothing yet"*).
 - After each task, if the agent passes, the curve shifts right and gets narrower; if it fails, it shifts left.
-- At every step, we calculate the overlap: **What is the probability $P(\\theta_{\\text{cand}} > \\theta_{\\text{base}})$ that the Candidate is genuinely better than the Baseline?**
+- At every step, we calculate the overlap: **What is the probability $P(\theta_{\text{cand}} > \theta_{\text{base}})$ that the Candidate is genuinely better than the Baseline?**
   - If that probability drops below **10%** ($P \le 0.10$), we **Early Abandon** immediately!
   - If that probability climbs above **95%** ($P \ge 0.95$), we **Early Accept** and celebrate!
 
 Across a typical portfolio of 100 weak prompt ideas and 10 strong ones, this saves **~74% of your LLM token budget and wall-clock time**.""",
+        "hill_climbing_role": "Stage 5 — The High-Velocity Inner-Loop Filter (`SEQUENTIAL_EXEC` Early Pruning)",
+        "hill_climbing_explanation": r"""In an autonomous **Agentic Hill-Climbing** harness (such as `agentic-harness-hill-climbing`, AlphaEvolve, or OPRO), **85% to 90% of candidate mutations generated during search are regressions or no-ops** (e.g., a prompt edit that accidentally breaks tool formatting or adds unhelpful verbosity).
+
+- **What Breaks Without It (Compute Starvation)**: If your hill-climber runs all $N=500$ benchmark tasks to completion on every single dead-end candidate, evaluating 110 mutations requires **55,000 full agent trajectories**. At 30 seconds per agent trajectory, your hill-climber stalls for days spending 90% of its GPU/API budget testing already-broken candidates!
+- **How It Supercharges the Hill-Climber**:
+  1. **Real-Time Pruning (`ABANDON` at $P \le 0.10$)**: By streaming task completions into `BetaBinomialEvaluator.step()`, bad mutations are mathematically identified and killed after just **20–35 tasks**, freeing the worker pool immediately to test the next candidate mutation.
+  2. **4x Faster Hill-Climbing Velocity**: Cutting total benchmark evaluations from **55,000 down to 14,193 (~74.2% compute savings)** means your hill-climber can explore **nearly 4x as many evolutionary generations** in the exact same wall-clock window and token budget!""",
         "glossary": [
             ("Prior Distribution $\\text{Beta}(\\alpha_0, \\beta_0)$", "Your starting belief about an agent's pass rate before running any tasks. $\\text{Beta}(1, 1)$ is a completely flat line from 0% to 100% ('total open mind')."),
             ("Posterior Distribution $\\text{Beta}(\\alpha_0 + s, \\beta_0 + f)$", "Your updated belief curve after observing $s$ passes and $f$ failures. As more data arrives, the bell curve gets taller and skinnier."),
@@ -276,7 +314,7 @@ Across a typical portfolio of 100 weak prompt ideas and 10 strong ones, this sav
             "uneven sample sizes ($N_j \\in [3, 150]$), preventing false regression panic on sparse edge-case slices."
         ),
         "metaphor_title": "The Opening-Day Baseball Batting Average: Borrowing Strength from the League",
-        "layman_explanation": """Imagine it is Opening Day of the baseball season. A rookie steps up to the plate 3 times and strikes out all 3 times ($0 / 3 = 0.000$ batting average).
+        "layman_explanation": r"""Imagine it is Opening Day of the baseball season. A rookie steps up to the plate 3 times and strikes out all 3 times ($0 / 3 = 0.000$ batting average).
 
 - **No Pooling (Panic Mode)**: Looking only at those 3 swings, a naive manager screams: *"His true skill is 0%! Cut him from the roster immediately!"*
 - **Complete Pooling (Blind Mode)**: Ignoring the 3 strikeouts completely and saying: *"Every player in Major League Baseball bats .260, so he is a .260 hitter."*
@@ -284,12 +322,21 @@ Across a typical portfolio of 100 weak prompt ideas and 10 strong ones, this sav
 
 ### Why This Matters for AI Agents
 When you slice an agent benchmark into fine-grained failure categories (e.g., `sql_generation` with $N=150$ tasks vs. `distributed_race_condition` with only $N=3$ tasks), a single unlucky failure in a 3-task category drops the raw pass rate by **33%**! Without **Hierarchical Bayesian Shrinkage**, engineering teams waste days chasing phantom "0% pass rate" emergencies in tiny categories that are just small-sample noise.""",
+        "hill_climbing_role": "Stage 6 — Multi-Slice Regression Guardrail (Preventing 'Edge-Case Whiplash' During the Climb)",
+        "hill_climbing_explanation": r"""Production **Agentic Hill-Climbing** harnesses don't just optimize one global number—they enforce **per-category non-regression constraints** across 10 to 30 behavioral slices (e.g., *"Promote the candidate prompt only if overall accuracy improves AND no individual domain slice regresses by more than 10%"*).
+
+- **What Breaks Without It (Edge-Case Whiplash & False Vetoes)**:
+  - Many critical edge-case slices (`distributed_race_condition`, `memory_leak`) only have $N=3$ or $N=4$ tasks in the benchmark. A single random failure swings the raw unpooled pass rate from `33.3%` down to `0.0%` (`-33.3 pp`!).
+  - **False Vetoes**: A naive hill-climber sees the `-33.3 pp` drop on that 3-task slice and **vetoes a brilliant candidate prompt** that actually improved the 150-task core categories by $+8\%$.
+  - **Prompt Whiplash**: Even worse, if an LLM meta-optimizer sees `distributed_race_condition = 0.0%`, it over-corrects by stuffing the system prompt with race-condition instructions, breaking SQL and API tool calling on the next step!
+- **How It Supercharges the Hill-Climber**:
+  **Hierarchical Bayesian Partial Pooling** shrinks sparse slices toward the global hyperprior mean ($\mu_0$) using weight $B_j = \frac{\kappa}{\kappa + N_j}$—pulling a noisy `0/3 (0.0%)` slice to a realistic **56.8%** while leaving $N=150$ categories anchored to their empirical data. This cuts category estimation RMSE by **68%** and eliminates false-alarm vetoes during multi-slice hill-climbing.""",
         "glossary": [
             ("No Pooling ($S_j / N_j$)", "Calculating each category's pass rate in total isolation. Highly accurate for huge categories ($N=150$), wildly noisy for tiny categories ($N=3$)."),
             ("Complete Pooling", "Lumping all tasks together into one global average ($68.2\\%$), ignoring real differences between easy and hard categories."),
             ("Partial Pooling (Hierarchical Bayes)", "The gold-standard compromise: each category gets a weighted blend between its own raw score and the global average, weighted by how much data ($N_j$) it has."),
             ("Shrinkage Factor ($B_j = \\frac{\\kappa}{\\kappa + N_j}$)", "The 'magnetic pull' toward the global average. When sample size $N_j=3$ is tiny, $B_j \\approx 83\\%$ (strong pull to the global mean). When $N_j=150$ is huge, $B_j \\approx 9\\%$ (stays anchored to its own data)."),
-            ("Hyperprior ($\\mu_0, \\kappa$)", "The overarching 'league average' ($\mu_0$) and consistency strength ($\kappa$) learned automatically across all categories."),
+            ("Hyperprior ($\\mu_0, \\kappa$)", "The overarching 'league average' ($\\mu_0$) and consistency strength ($\\kappa$) learned automatically across all categories."),
             ("Credible Interval (95% CI)", "The horizontal error bar showing the 95% likely range of a category's true pass rate."),
         ],
         "math": r"""- **Two-Level Hierarchical Beta-Binomial Model**:
@@ -324,14 +371,21 @@ When you slice an agent benchmark into fine-grained failure categories (e.g., `s
             "and `GP-UCB`) to find the global optimum of an expensive black-box agent harness within 25 trials."
         ),
         "metaphor_title": "Prospecting for Gold in the Fog with a Smart Uncertainty Radar",
-        "layman_explanation": """Imagine searching for the deepest oil reservoir across a vast mountain range covered in thick fog, where **drilling a single test well costs \$10,000** (just like running a full 500-task agent benchmark suite costs hours of GPU/API time):
+        "layman_explanation": r"""Imagine searching for the deepest oil reservoir across a vast mountain range covered in thick fog, where **drilling a single test well costs \$10,000** (just like running a full 500-task agent benchmark suite costs hours of GPU/API time):
 
-- **Grid Search (The Brute-Force Way)**: Drilling a well every 100 yards on a $10 \\times 10$ grid requires **100 wells (\$1,000,000)**—and 90% of those wells are wasted in flat, barren desert!
+- **Grid Search (The Brute-Force Way)**: Drilling a well every 100 yards on a $10 \times 10$ grid requires **100 wells (\$1,000,000)**—and 90% of those wells are wasted in flat, barren desert!
 - **Bayesian Optimization (The Smart Radar)**:
-  1. **The Surrogate Map (Gaussian Process)**: You drill 5 initial random wells. Between those 5 pins, the Gaussian Process draws a smooth contour map of the likely terrain (**Predicted Mean $\\mu$**) AND a "Fog Thickness Map" (**Uncertainty $\\sigma$**) that is zero right where you drilled and thickens in unexplored regions.
+  1. **The Surrogate Map (Gaussian Process)**: You drill 5 initial random wells. Between those 5 pins, the Gaussian Process draws a smooth contour map of the likely terrain (**Predicted Mean $\mu$**) AND a "Fog Thickness Map" (**Uncertainty $\sigma$**) that is zero right where you drilled and thickens in unexplored regions.
   2. **The Acquisition Compass (`Expected Improvement`)**: Where should you drill Well #6? You want a spot that either has a **high predicted score** (*Exploitation: drilling near your best discovery so far*) OR **huge uncertainty** (*Exploration: checking a big foggy corner that might hide a giant peak*). The Acquisition Function combines both into a single glowing beacon pointing to the exact most informative coordinate to test next!
 
 Within just **25 trials** (instead of 100+ grid points), Bayesian Optimization locks onto the global peak.""",
+        "hill_climbing_role": "Stage 7 — Escaping Local Optima via Sample-Efficient Global Search (`CANDIDATE_SEARCH` Engine)",
+        "hill_climbing_explanation": r"""Standard greedy **Agentic Hill-Climbing** suffers from a classic fatal flaw: **getting trapped on a local hill (local optimum)**.
+
+- **What Breaks Without It (Stuck on a Foothill)**: Suppose your agent harness has a local performance bump around `reasoning_tokens=1,200, context_limit=25k` (72% pass rate) and a much taller global peak at `reasoning_tokens=2,850, context_limit=85k` (86% pass rate), separated by a dip. A greedy local hill-climber that only takes small steps uphill climbs onto the 72% foothill, sees the score drop in every immediate direction, and stops forever—missing the 86% global peak!
+- **How It Supercharges the Hill-Climber**:
+  1. **Memory of Uncertainty ($\sigma(\mathbf{x})$)**: Unlike greedy hill-climbing (which only remembers the current best point), a **Gaussian Process (`Matern 5/2`) Surrogate** remembers *every* configuration tested so far and knows exactly which regions of the parameter space are still unexplored (high $\sigma$).
+  2. **Automated Exploration-Exploitation Switching**: When the local hill flattens out, the **Expected Improvement (EI)** and **GP-UCB** acquisition functions automatically shift weight to the exploration term $\sigma(\mathbf{x})\phi(Z)$, launching a targeted probe across the valley to discover the true global peak within **25 evaluations**.""",
         "glossary": [
             ("Black-Box Function", "A system (like a full agent benchmark run) where you can plug in configuration numbers and observe the final pass-rate score, but you don't have a simple math formula for what happens inside."),
             ("Gaussian Process (GP) Surrogate", "A flexible statistical model that fits a smooth curve through the points you've tested so far, while also calculating a confidence band (uncertainty $\\sigma$) at every untested point."),
@@ -372,7 +426,7 @@ Within just **25 trials** (instead of 100+ grid points), Bayesian Optimization l
             "Negative Constraints."
         ),
         "metaphor_title": "Sorting a Mountain of 300 Crash Receipts into 5 Neat Diagnostic Folders",
-        "layman_explanation": """Imagine your AI agent runs overnight on 1,000 tasks and produces **300 failed crash logs**—each a 40-line wall of messy stack traces, JSON payloads, and error codes.
+        "layman_explanation": r"""Imagine your AI agent runs overnight on 1,000 tasks and produces **300 failed crash logs**—each a 40-line wall of messy stack traces, JSON payloads, and error codes.
 
 No human engineer wants to read 300 raw stack traces line by line on Monday morning. Worse, if you just read the first 3 logs, you might think the whole system is failing due to API Timeouts, missing the fact that 60% of the crashes are actually caused by the agent inventing a fake tool parameter!
 
@@ -381,13 +435,22 @@ Instead of reading 300 logs manually, we build an automated "Prism" that sorts t
 1. **Highlight the Rare Diagnostic Words (`TF-IDF`)**: Every log contains boring boilerplate words like `ERROR`, `Traceback`, `agent_runner.py`. **TF-IDF** automatically mutes words that appear in every log and boosts words that uniquely identify a specific crash (like `429DEADLINE_EXCEEDED`, `maximum_context_length`, or `AdditionalPropertiesError`).
 2. **Group into Constellations (`PCA + k-Means`)**: Logs with similar error signatures are pulled into 5 tight geometric clusters.
 3. **Pick the Single Best Representative (`Cluster Medoid`)**: Instead of reading 60 logs in Cluster #1, the math finds the single real log sitting closest to the exact center of that cluster (**the Medoid**) and writes a **System Prompt Guardrail** to fix all 60 failures at once!""",
+        "hill_climbing_role": "Stage 8 — Closing the Loop: Directed Mutation Generation (`TRACE_DIAGNOSIS` $\\to$ Next Candidate)",
+        "hill_climbing_explanation": r"""How does an **Agentic Hill-Climber** decide *what* to change in the prompt or harness for the next iteration?
+
+- **What Breaks Without It (Blind Random Walk vs. Context-Overflow Bias)**:
+  - **Blind Mutation**: If the hill-climber simply asks an LLM to *"rephrase the system prompt to make it better"* without diagnostic feedback, it performs a blind random walk—wasting dozens of steps guessing what might be wrong.
+  - **Recency / Sample Bias**: Conversely, if you dump 300 raw failure logs into a meta-optimizer LLM, you either overflow the context window or bias the LLM toward fixing whichever 2 or 3 failures happened to appear last in the prompt!
+- **How It Supercharges the Hill-Climber**:
+  1. **Quantitative Pareto Prioritization**: **Sublinear TF-IDF + $k$-Means** groups all 300 failures from the current hill-climbing evaluation into $K$ distinct failure archetypes (`ARI = 1.000`) and ranks them by exact cluster volume (e.g., *"Cluster C2: Tool Schema Hallucination accounts for 24% of all failures"*).
+  2. **Medoid-Grounded Prompt Synthesis**: By feeding the meta-optimizer **only the 5 Cluster Medoid traces + top TF-IDF diagnostic tokens**, the hill-climber synthesizes targeted **System Prompt Negative Constraints** that directly eliminate the dominant failure modes on the very next climb step!""",
         "glossary": [
             ("TF-IDF (Term Frequency–Inverse Document Frequency)", "A text-scoring formula that gives high weight to specific error tokens (like `PermissionError` or `LoopDetectedError`) and near-zero weight to common boilerplate words that appear in every log."),
             ("Sublinear TF Scaling ($1 + \\log \\text{tf}$)", "Prevents a single error word repeated 50 times in a stack-overflow loop from dominating the entire vector."),
             ("PCA (Principal Component Analysis)", "A dimensionality-reduction technique that squashes a 500-word vocabulary space down into a 2D map ($x, y$) so we can visualize the clusters on a scatter plot."),
             ("$k$-Means Clustering", "An unsupervised algorithm that automatically groups the 300 logs into $k$ neighborhoods based on their cosine/Euclidean similarity."),
             ("Silhouette Score", "A quality score from $-1$ to $+1$ measuring how tightly packed each cluster is and how cleanly separated it is from neighboring clusters. The spike at $k=5$ tells us there are exactly 5 failure modes!"),
-            ("Cluster Medoid", "The single actual failure log sits closest to the mathematical center (centroid) of a cluster—the best 'textbook example' for an engineer to inspect."),
+            ("Cluster Medoid", "The single actual failure log sitting closest to the mathematical center (centroid) of a cluster—the best 'textbook example' for an engineer or meta-optimizer to inspect."),
         ],
         "math": r"""- **Sublinear TF-IDF Vectorization**:
   For term $t$ in failure log $d$ across $N$ total failure logs:
@@ -413,7 +476,7 @@ Instead of reading 300 logs manually, we build an automated "Prism" that sorts t
 
 
 def build_layman_notebook_markdown(spec: dict, img_prefix: str) -> str:
-    """Builds the rich Layman's Guide + Concept Visual + Glossary + References markdown cell for a notebook."""
+    """Builds the rich Layman's Guide + Hill-Climbing Relevance + Concept Visual + Glossary + References cell."""
     glossary_rows = "\n".join([f"| **{term}** | {desc} |" for term, desc in spec["glossary"]])
     refs = "\n".join([f"- {r}" for r in spec["references"]])
     return f"""## 🧠 Layman's Guide: {spec['metaphor_title']}
@@ -421,6 +484,15 @@ def build_layman_notebook_markdown(spec: dict, img_prefix: str) -> str:
 ![{spec['title']} — Concept Illustration]({img_prefix}/figures/concepts/{spec['concept_img']})
 
 {spec['layman_explanation']}
+
+---
+
+### 🧗 Why This Matters for Agentic Hill-Climbing
+> **Hill-Climbing Role**: *{spec['hill_climbing_role']}*
+
+{spec['hill_climbing_explanation']}
+
+---
 
 ### 📖 Plain-English Terminology & Jargon Buster
 
@@ -459,7 +531,7 @@ def main() -> None:
         ch_dir = CHAPTERS_DIR / slug
         ch_dir.mkdir(parents=True, exist_ok=True)
 
-        # 1. Update root notebook with layman guide (using ./figures/... path)
+        # 1. Update root notebook with layman + hill-climbing guide (using ./figures/... path)
         root_nb = ROOT / f"{slug}.ipynb"
         inject_layman_cell_into_notebook(root_nb, spec, img_prefix=".")
 
@@ -488,6 +560,14 @@ def main() -> None:
 ## 🧠 Layman's Guide: {spec['metaphor_title']}
 
 {spec['layman_explanation']}
+
+---
+
+## 🧗 Why This Matters for Agentic Hill-Climbing
+
+> **Role in the Optimization Loop**: **{spec['hill_climbing_role']}**
+
+{spec['hill_climbing_explanation']}
 
 ---
 
@@ -547,7 +627,7 @@ import agent_stats
 {refs}
 """
         (ch_dir / "README.md").write_text(readme_md, encoding="utf-8")
-        print(f"Generated enriched chapters/{slug}/README.md + updated notebooks")
+        print(f"Generated enriched chapters/{slug}/README.md + updated notebooks with Agentic Hill-Climbing sections")
 
 
 if __name__ == "__main__":

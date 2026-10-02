@@ -23,6 +23,21 @@ When you slice an agent benchmark into fine-grained failure categories (e.g., `s
 
 ---
 
+## 🧗 Why This Matters for Agentic Hill-Climbing
+
+> **Role in the Optimization Loop**: **Stage 6 — Multi-Slice Regression Guardrail (Preventing 'Edge-Case Whiplash' During the Climb)**
+
+Production **Agentic Hill-Climbing** harnesses don't just optimize one global number—they enforce **per-category non-regression constraints** across 10 to 30 behavioral slices (e.g., *"Promote the candidate prompt only if overall accuracy improves AND no individual domain slice regresses by more than 10%"*).
+
+- **What Breaks Without It (Edge-Case Whiplash & False Vetoes)**:
+  - Many critical edge-case slices (`distributed_race_condition`, `memory_leak`) only have $N=3$ or $N=4$ tasks in the benchmark. A single random failure swings the raw unpooled pass rate from `33.3%` down to `0.0%` (`-33.3 pp`!).
+  - **False Vetoes**: A naive hill-climber sees the `-33.3 pp` drop on that 3-task slice and **vetoes a brilliant candidate prompt** that actually improved the 150-task core categories by $+8\%$.
+  - **Prompt Whiplash**: Even worse, if an LLM meta-optimizer sees `distributed_race_condition = 0.0%`, it over-corrects by stuffing the system prompt with race-condition instructions, breaking SQL and API tool calling on the next step!
+- **How It Supercharges the Hill-Climber**:
+  **Hierarchical Bayesian Partial Pooling** shrinks sparse slices toward the global hyperprior mean ($\mu_0$) using weight $B_j = \frac{\kappa}{\kappa + N_j}$—pulling a noisy `0/3 (0.0%)` slice to a realistic **56.8%** while leaving $N=150$ categories anchored to their empirical data. This cuts category estimation RMSE by **68%** and eliminates false-alarm vetoes during multi-slice hill-climbing.
+
+---
+
 ## 📖 Plain-English Terminology & Jargon Buster
 
 | Term / Symbol | Plain-English Meaning |

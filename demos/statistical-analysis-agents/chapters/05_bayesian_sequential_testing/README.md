@@ -28,6 +28,19 @@ Across a typical portfolio of 100 weak prompt ideas and 10 strong ones, this sav
 
 ---
 
+## 🧗 Why This Matters for Agentic Hill-Climbing
+
+> **Role in the Optimization Loop**: **Stage 5 — The High-Velocity Inner-Loop Filter (`SEQUENTIAL_EXEC` Early Pruning)**
+
+In an autonomous **Agentic Hill-Climbing** harness (such as `agentic-harness-hill-climbing`, AlphaEvolve, or OPRO), **85% to 90% of candidate mutations generated during search are regressions or no-ops** (e.g., a prompt edit that accidentally breaks tool formatting or adds unhelpful verbosity).
+
+- **What Breaks Without It (Compute Starvation)**: If your hill-climber runs all $N=500$ benchmark tasks to completion on every single dead-end candidate, evaluating 110 mutations requires **55,000 full agent trajectories**. At 30 seconds per agent trajectory, your hill-climber stalls for days spending 90% of its GPU/API budget testing already-broken candidates!
+- **How It Supercharges the Hill-Climber**:
+  1. **Real-Time Pruning (`ABANDON` at $P \le 0.10$)**: By streaming task completions into `BetaBinomialEvaluator.step()`, bad mutations are mathematically identified and killed after just **20–35 tasks**, freeing the worker pool immediately to test the next candidate mutation.
+  2. **4x Faster Hill-Climbing Velocity**: Cutting total benchmark evaluations from **55,000 down to 14,193 (~74.2% compute savings)** means your hill-climber can explore **nearly 4x as many evolutionary generations** in the exact same wall-clock window and token budget!
+
+---
+
 ## 📖 Plain-English Terminology & Jargon Buster
 
 | Term / Symbol | Plain-English Meaning |

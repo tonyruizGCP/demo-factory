@@ -23,6 +23,19 @@ Within just **25 trials** (instead of 100+ grid points), Bayesian Optimization l
 
 ---
 
+## 🧗 Why This Matters for Agentic Hill-Climbing
+
+> **Role in the Optimization Loop**: **Stage 7 — Escaping Local Optima via Sample-Efficient Global Search (`CANDIDATE_SEARCH` Engine)**
+
+Standard greedy **Agentic Hill-Climbing** suffers from a classic fatal flaw: **getting trapped on a local hill (local optimum)**.
+
+- **What Breaks Without It (Stuck on a Foothill)**: Suppose your agent harness has a local performance bump around `reasoning_tokens=1,200, context_limit=25k` (72% pass rate) and a much taller global peak at `reasoning_tokens=2,850, context_limit=85k` (86% pass rate), separated by a dip. A greedy local hill-climber that only takes small steps uphill climbs onto the 72% foothill, sees the score drop in every immediate direction, and stops forever—missing the 86% global peak!
+- **How It Supercharges the Hill-Climber**:
+  1. **Memory of Uncertainty ($\sigma(\mathbf{x})$)**: Unlike greedy hill-climbing (which only remembers the current best point), a **Gaussian Process (`Matern 5/2`) Surrogate** remembers *every* configuration tested so far and knows exactly which regions of the parameter space are still unexplored (high $\sigma$).
+  2. **Automated Exploration-Exploitation Switching**: When the local hill flattens out, the **Expected Improvement (EI)** and **GP-UCB** acquisition functions automatically shift weight to the exploration term $\sigma(\mathbf{x})\phi(Z)$, launching a targeted probe across the valley to discover the true global peak within **25 evaluations**.
+
+---
+
 ## 📖 Plain-English Terminology & Jargon Buster
 
 | Term / Symbol | Plain-English Meaning |

@@ -24,6 +24,21 @@ Instead of reading 300 logs manually, we build an automated "Prism" that sorts t
 
 ---
 
+## 🧗 Why This Matters for Agentic Hill-Climbing
+
+> **Role in the Optimization Loop**: **Stage 8 — Closing the Loop: Directed Mutation Generation (`TRACE_DIAGNOSIS` $\to$ Next Candidate)**
+
+How does an **Agentic Hill-Climber** decide *what* to change in the prompt or harness for the next iteration?
+
+- **What Breaks Without It (Blind Random Walk vs. Context-Overflow Bias)**:
+  - **Blind Mutation**: If the hill-climber simply asks an LLM to *"rephrase the system prompt to make it better"* without diagnostic feedback, it performs a blind random walk—wasting dozens of steps guessing what might be wrong.
+  - **Recency / Sample Bias**: Conversely, if you dump 300 raw failure logs into a meta-optimizer LLM, you either overflow the context window or bias the LLM toward fixing whichever 2 or 3 failures happened to appear last in the prompt!
+- **How It Supercharges the Hill-Climber**:
+  1. **Quantitative Pareto Prioritization**: **Sublinear TF-IDF + $k$-Means** groups all 300 failures from the current hill-climbing evaluation into $K$ distinct failure archetypes (`ARI = 1.000`) and ranks them by exact cluster volume (e.g., *"Cluster C2: Tool Schema Hallucination accounts for 24% of all failures"*).
+  2. **Medoid-Grounded Prompt Synthesis**: By feeding the meta-optimizer **only the 5 Cluster Medoid traces + top TF-IDF diagnostic tokens**, the hill-climber synthesizes targeted **System Prompt Negative Constraints** that directly eliminate the dominant failure modes on the very next climb step!
+
+---
+
 ## 📖 Plain-English Terminology & Jargon Buster
 
 | Term / Symbol | Plain-English Meaning |
@@ -33,7 +48,7 @@ Instead of reading 300 logs manually, we build an automated "Prism" that sorts t
 | **PCA (Principal Component Analysis)** | A dimensionality-reduction technique that squashes a 500-word vocabulary space down into a 2D map ($x, y$) so we can visualize the clusters on a scatter plot. |
 | **$k$-Means Clustering** | An unsupervised algorithm that automatically groups the 300 logs into $k$ neighborhoods based on their cosine/Euclidean similarity. |
 | **Silhouette Score** | A quality score from $-1$ to $+1$ measuring how tightly packed each cluster is and how cleanly separated it is from neighboring clusters. The spike at $k=5$ tells us there are exactly 5 failure modes! |
-| **Cluster Medoid** | The single actual failure log sits closest to the mathematical center (centroid) of a cluster—the best 'textbook example' for an engineer to inspect. |
+| **Cluster Medoid** | The single actual failure log sitting closest to the mathematical center (centroid) of a cluster—the best 'textbook example' for an engineer or meta-optimizer to inspect. |
 
 ---
 

@@ -23,6 +23,19 @@ In modern AI engineering, developers (and automated prompt optimizers like DSPy 
 
 ---
 
+## 🧗 Why This Matters for Agentic Hill-Climbing
+
+> **Role in the Optimization Loop**: **Stage 2 — The Anti-Goodharting Circuit Breaker (`HOLDOUT_GATE` & Stratified Partitioning)**
+
+**Agentic Hill-Climbing** is, by definition, an iterative search loop that repeatedly queries a benchmark to improve a prompt or harness. Because LLM prompts have virtually infinite degrees of freedom (you can append arbitrary natural-language instructions), **hill-climbers are extraordinarily prone to overfitting**:
+
+- **What Breaks Without It (Reward Hacking & Prompt Bloat)**: When an autonomous hill-climber (or human engineer) inspects failed trajectories on the training set and proposes 30 sequential prompt mutations, it quickly discovers **benchmark-specific shortcuts**—hardcoding edge-case answers, overfitting to specific test phrasing, or adding conflicting `CRITICAL: NEVER DO X` rules. In our simulation, after **Step 9**, ungated hill-climbing continues pushing the Optimization score above **91%**, while true performance on unseen tasks collapses to **52%**!
+- **How It Supercharges the Hill-Climber**:
+  1. **Jointly Stratified Splitting (`Difficulty × Capability`)** guarantees that rare, high-difficulty task slices (e.g., `Hard × code_execution`) are equally represented in both the Optimization climb set and the Holdout vault—preventing the hill-climber from gaming easy tasks.
+  2. **Automated `HoldoutGate` Enforcement**: Before any candidate mutation is promoted as the new baseline in the hill-climbing state machine, it must pass the `HoldoutGate` ($\Delta \hat{R}_{\text{hold}} \ge 0$ and generalization gap $\hat{R}_{\text{opt}} - \hat{R}_{\text{hold}} \le \gamma_{\max}$). Overfit mutations are automatically rejected and rolled back, sustaining a clean **75%+ true generalization plateau**.
+
+---
+
 ## 📖 Plain-English Terminology & Jargon Buster
 
 | Term / Symbol | Plain-English Meaning |
@@ -49,7 +62,7 @@ In modern AI engineering, developers (and automated prompt optimizers like DSPy 
 
 ## ✨ Key Implementation & Simulation Highlights
 
-- Generates 200 synthetic benchmark tasks across 9 difficulty $\times$ capability strata and splits them 60% Optimization ($n=120$) / 40% Holdout ($n=80$).
+- Generates 200 synthetic benchmark tasks across 9 difficulty $\times$ capability strata and splits them 60% Optimization ($n=120$) / 40% Holdout ($n=180$).
 - Simulates 30 sequential prompt mutations mixing genuine capability improvements with benchmark-quirk reward hacking.
 - Pinpoints the exact **Overfitting Divergence Step** where ungated optimization climbs to >90% on the Optimization set while collapsing to ~52% on unseen Holdout tasks.
 

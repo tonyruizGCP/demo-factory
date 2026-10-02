@@ -20,7 +20,20 @@ Imagine you are hiring an archer to protect a castle, and you give two candidate
 ### Why This Matters for AI Agents
 Large Language Models (LLMs) are **stochastic** (non-deterministic)—even with the exact same prompt, slight sampling randomness or tool-timing differences can cause an agent to take a different reasoning path on each run:
 - **`Pass@k` ("Try-Until-You-Win")** is great when you have an automated verifier—for example, an AI coding assistant that generates 5 candidate patches, runs your unit test suite on all 5, and only shows the user the 1 patch that passed.
-- **`Pass^k` ("Zero-Defect Consistency")** is essential when an agent interacts directly with a live customer, executes a financial transaction, or modifies a database where **there is no undo button**. An agent that succeeds 75% of the time on 1 try (`Pass@1 = 75%`) will succeed 5 times in a row only $0.75^5 pprox 23.7\%$ of the time (`Pass^5 = 23.7%`)!
+- **`Pass^k` ("Zero-Defect Consistency")** is essential when an agent interacts directly with a live customer, executes a financial transaction, or modifies a database where **there is no undo button**. An agent that succeeds 75% of the time on 1 try (`Pass@1 = 75%`) will succeed 5 times in a row only $0.75^5 \approx 23.7\%$ of the time (`Pass^5 = 23.7%`)!
+
+---
+
+## 🧗 Why This Matters for Agentic Hill-Climbing
+
+> **Role in the Optimization Loop**: **Stage 1 — Defining the Hill's Objective Function (Climbing True Altitude vs. Climbing Noise)**
+
+In **Agentic Hill-Climbing**, an automated optimizer iteratively mutates your system prompt or tool definitions, scores the candidate against your benchmark, and keeps the mutation if the score goes up. **The metric you choose defines the "altitude" of the hill:**
+
+- **What Breaks Without It (Climbing Execution Noise)**: If your hill-climber evaluates each prompt mutation using only a single seed (`Pass@1`) or optimizes `Pass@k` for a customer-facing agent, the optimizer will **mistake a lucky coin flip for a genuine improvement**. In our simulation, a chaotic/high-variance prompt gets lucky on a single run (`Pass@1 = 76%`) and tricks the hill-climber into replacing a rock-solid baseline (`Pass@1 = 74%`). Beneath the surface, that "upgrade" caused 5-run reliability (`Pass^5`) to crash from **66% down to 26%**!
+- **How It Supercharges the Hill-Climber**:
+  1. **Multi-Seed Evaluation ($n$ seeds per task)** smooths out trajectory variance so the hill-climber doesn't chase phantom 2% bumps caused by random LLM sampling.
+  2. **Objective Alignment**: Using $\widehat{\text{Pass}@k}$ when hill-climbing a **verifier-backed coding harness** (where best-of-$k$ sampling is used at inference time) versus $\widehat{\text{Pass}^k}$ when hill-climbing an **autonomous transactional agent** guarantees that every accepted step up the hill improves real production reliability.
 
 ---
 
