@@ -1,0 +1,29 @@
+metrics_to_run:
+  - custom_response_quality
+  - tool_invocation_check
+
+custom_metrics:
+  # Local LLM-as-judge (see response_quality.py). Runs in-process via
+  # google-genai on Agent Platform (ADC) or Google AI Studio (GEMINI_API_KEY).
+  - name: custom_response_quality
+    custom_function_file: response_quality.py
+  # Deterministic check: verifies the agent invoked at least one connected datastore tool
+  # and returned a non-empty grounded answer.
+  - name: tool_invocation_check
+    custom_function: |
+      def evaluate(instance):
+          agent_trace = str(instance.get("agent_data") or "")
+          resp_text = str(instance.get("response") or "")
+          used_tool = any(
+              t in agent_trace
+              for t in (
+                  "search_jira_tickets",
+                  "search_it_knowledge_base",
+                  "search_it_emails_and_calendar",
+                  "search_salesforce_cases",
+                  "search_github_engineering",
+                  "search_datastore_records",
+              )
+          )
+          score = 1.0 if (used_tool and len(resp_text.strip()) > 30) else 0.0
+          return {"score": score}

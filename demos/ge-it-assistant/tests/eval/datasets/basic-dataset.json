@@ -1,0 +1,130 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "jira_ticket_status",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "What is the latest status of my Jira ticket SAM1-23, and what other high or medium priority tickets are open in project SAM1?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Jira ticket SAM1-23 ('Escalation: GC5060 Electrical Wiring Installation Documentation') has status 'To Do' and 'High' priority. The other open medium priority ticket in project SAM1 is SAM1-22 ('Integrate OAuth feature into transaction system for billing'), which has status 'To Do' and 'Medium' priority."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "it_kb_drive_lookup",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Find the technical resolution plan and executive briefing documents for the GC5060 support bottleneck in Google Drive."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "The relevant Google Drive documents for GC5060 are 'GC5060 Technical Resolution & GTM Preflight Plan', 'GC5060 Pipeline Resolution Plan', and 'Executive Briefing: GC5060 Support Bottleneck & Pipeline Resolution'."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "it_calendar_onboarding",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Check my Google Calendar to see what IT Laptop Setup and 30-Day Check-in onboarding sessions are scheduled."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Your Google Calendar includes the 'IT Laptop Setup' onboarding session and the '30-Day Check-in with HR and Manager' onboarding session."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "it_security_email_audit",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Check my Gmail inbox for any recent Salesforce security token updates or Jira work item notifications."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Recent IT and security emails in Gmail include 'Your new Salesforce security token' (and October Salesforce security requirement updates) as well as Jira notifications such as 'Finish creating work item SAM1-9' and 'Welcome to your Jira workspace'."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "github_repo_lookup",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Which GitHub repositories do we have connected for our Salesforce ADK agent and Gemini Enterprise Spark demos?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "The connected GitHub repositories include adk-salesforce-agent (ADK agent that uses App Integration connector and is deployable to Gemini Enterprise), ge-spark-gtm-demo, and spark-demo-apps."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "cross_system_escalation_triage",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "We have an escalation around the GC5060 generator electrical wiring. Check Salesforce cases, Jira tickets in SAM1, and Google Drive runbooks to give me a complete status summary."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Across connected systems for GC5060: 1) Salesforce has Case 00001002 ('Seeking guidance on electrical wiring installation for GC5060', Status: New, Priority: Low). 2) Jira project SAM1 has ticket SAM1-23 ('Escalation: GC5060 Electrical Wiring Installation Documentation', Status: To Do, Priority: High). 3) Google Drive contains 'GC5060 Pipeline Resolution Plan', 'GC5060 Technical Resolution & GTM Preflight Plan', and 'Executive Briefing: GC5060 Support Bottleneck & Pipeline Resolution'."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
