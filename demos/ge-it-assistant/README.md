@@ -8,12 +8,74 @@ Built on the [VeerMuchandi/Learn_ADK_Agents/ge_datastore_accessor_agent](https:/
 
 ## Architecture & Connected Data Stores
 
+```mermaid
+flowchart TB
+    User(["End User"]) -->|"Queries IT Assistant"| GE["Gemini Enterprise App<br/>(acme_ge_app)"]
+    GE -->|"user_id + session<br/>(+ optional AUTH_ID state)"| RE
+
+    subgraph Runtime["Vertex AI Agent Runtime (identityType: AGENT_IDENTITY)"]
+        direction TB
+        SPIFFE["Dedicated SPIFFE Workload Identity<br/>principal://agents.global.org-ORG_ID.system.id.goog/.../reasoningEngines/ENGINE_ID"]
+        Root["root_agent (ADK 2.0 Coordinator)<br/>gemini-2.5-flash | max_output_tokens=2048"]
+
+        subgraph Specialists["ADK 2.0 mode='task' Specialist Sub-Agents"]
+            JiraAgent["jira_ticket_specialist<br/>(JiraTriageReport)"]
+            WorkspaceAgent["workspace_it_specialist<br/>(WorkspaceITReport)"]
+            DevOpsAgent["devops_crm_specialist<br/>(DevOpsCRMReport)"]
+        end
+
+        subgraph Tools["Connected Datastore & Federated Tools (app/tools.py)"]
+            DSService["DatastoreService<br/>3-Tier Credential Resolution"]
+            T1["search_jira_tickets"]
+            T2["search_it_knowledge_base"]
+            T3["search_it_emails_and_calendar"]
+            T4["search_salesforce_cases"]
+            T5["search_github_engineering"]
+            T6["search_datastore_records"]
+        end
+
+        RE["ReasoningEngine Container"] --> SPIFFE
+        RE --> Root
+        Root --> Specialists
+        Root --> Tools
+        Specialists --> Tools
+        T1 & T2 & T3 & T4 & T5 & T6 --> DSService
+    end
+
+    subgraph Security["Agent Identity Auth Manager & Secret Manager"]
+        AuthMgr["Agent Identity Auth Manager<br/>(AuthProvider: ge-it-assistant-oauth)<br/>credentials:retrieve"]
+        SecMgr["Cloud Secret Manager<br/>(--secrets: ge-it-assistant-oauth-*)"]
+    end
+
+    SPIFFE -.->|"roles/agentidentity.user"| AuthMgr
+    SPIFFE -.->|"roles/secretmanager.secretAccessor"| SecMgr
+    DSService -->|"Tier 1: GcpAuthProviderScheme"| AuthMgr
+    DSService -->|"Tier 3: Headless Refresh Fallback"| SecMgr
+
+    subgraph Connectors["Gemini Enterprise Data Stores & Federated 3P APIs"]
+        WS["Workspace ACL Data Stores<br/>(Google Drive, NotebookLM, Gmail, Calendar)<br/>servingConfigs/default_search:search"]
+        Fed["Federated 3P Connectors<br/>(Jira SAM1, Salesforce Cases, GitHub)<br/>dataConnector:acquireAccessToken + Live REST/SOQL/JQL"]
+    end
+
+    DSService -->|"Per-User ACL Search"| WS
+    DSService -->|"3P Connector Token Exchange"| Fed
+```
+
 ```
 User / Gemini Enterprise (acme_ge_app)
-       │  (Injects 3LO OAuth token into tool_context.state[AUTH_NAME] / temp:{AUTH_NAME})
+       │  (Invokes ReasoningEngine with user_id + session)
+       ▼
+  Vertex AI Reasoning Engine (identityType: AGENT_IDENTITY)
+  SPIFFE ID: principal://agents.global.org-<ORG_ID>.system.id.goog/.../reasoningEngines/<ID>
+       │
+       ├──► Tier 1 Auth: Agent Identity Auth Manager (GcpAuthProviderScheme)
+       │      └── POST agentidentitycredentials.googleapis.com/v1/{auth_provider}/credentials:retrieve
+       ├──► Tier 2 Auth: Gemini Enterprise OAuth State (tool_context.state[AUTH_NAME])
+       └──► Tier 3 Auth: Cloud Secret Manager Mounts (--secrets ge-it-assistant-oauth-*) / Local ADC
+       │
        ▼
   root_agent (ADK 2.0 Coordinator — gemini-2.5-flash, max_output_tokens=2048)
-       ├── Fast-Path Connected Datastore Tools (app/tools.py)
+       ├── Fast-Path Connected Datastore Tools (app/tools.py -> DatastoreService)
        │     ├── search_datastore_records (Blueprint DataStore search)
        │     ├── search_jira_tickets (Jira Cloud SAM1 + Jira Issue DataStore)
        │     ├── search_it_knowledge_base (Google Drive + NotebookLM)
@@ -40,14 +102,18 @@ User / Gemini Enterprise (acme_ge_app)
 
 ---
 
-## Authentication, Security & Best Practices
+## Authentication, Security & Best Practices (Agent Identity + Auth Manager)
 
-1. **In Gemini Enterprise (`AUTH_ID` 3LO OAuth Pattern)**:
-   - Gemini Enterprise passes the end-user's OAuth 2.0 access token into `tool_context.state[AUTH_NAME]` (or `temp:{AUTH_NAME}`).
-   - `DatastoreService` extracts this token to enforce per-user ACLs when calling Discovery Engine `servingConfigs/default_search:search` and `dataConnector:acquireAccessToken`.
-   - For headless / service-account container fallback, runtime OAuth credentials (`USER_OAUTH_CLIENT_ID`, `USER_OAUTH_CLIENT_SECRET`, `USER_OAUTH_REFRESH_TOKEN`) are mounted from **Google Cloud Secret Manager** via `--secrets`.
-2. **Local Development & Evaluation (`agents-cli run` / `agents-cli eval`)**:
-   - When `tool_context.state` does not contain a 3LO token, `DatastoreService` automatically falls back to **Application Default Credentials (ADC)**:
+1. **Dedicated Agent Identity (`identityType: AGENT_IDENTITY`)**:
+   - Deployed with `--agent-identity`, provisioning a dedicated cryptographic SPIFFE principal (`principal://agents.global.org-<ORG_ID>.system.id.goog/resources/aiplatform/projects/<PROJECT_NUMBER>/locations/us-central1/reasoningEngines/<ENGINE_ID>`) instead of sharing the default Reasoning Engine service account.
+   - Least-privilege IAM roles (`roles/agentidentity.user`, `roles/secretmanager.secretAccessor`, `roles/aiplatform.user`, `roles/discoveryengine.viewer`) are bound directly to the agent's SPIFFE principal.
+2. **Agent Identity Auth Manager (`AuthProvider` + `GcpAuthProviderScheme`)**:
+   - Registers a 3-legged OAuth `AuthProvider` (`projects/$GCP_PROJECT/locations/us-central1/authProviders/ge-it-assistant-oauth`) in `agentidentity.googleapis.com`.
+   - `DatastoreService` queries `https://agentidentitycredentials.googleapis.com/v1/{auth_provider}/credentials:retrieve` (using `GcpAuthProviderScheme`) as **Tier 1** to retrieve short-lived end-user OAuth tokens at tool execution time without persisting raw tokens in `tool_context.state`.
+3. **Gemini Enterprise (`AUTH_ID` 3LO OAuth Pattern & Secret Manager Fallback)**:
+   - When invoked from Gemini Enterprise before or alongside Auth Manager consent, `DatastoreService` falls back to `tool_context.state[AUTH_NAME]` (`temp:{AUTH_NAME}`) as **Tier 2** and Secret Manager OAuth refresh credentials (`USER_OAUTH_CLIENT_ID`, `USER_OAUTH_CLIENT_SECRET`, `USER_OAUTH_REFRESH_TOKEN`) mounted via `--secrets` as **Tier 3**.
+4. **Local Development & Evaluation (`agents-cli run` / `agents-cli eval`)**:
+   - When running locally, `DatastoreService` automatically falls back to **Application Default Credentials (ADC)**:
      ```bash
      gcloud auth application-default login
      gcloud config set project acme-enterprise-demo
@@ -75,10 +141,11 @@ uv run pytest tests/unit tests/integration
 agents-cli eval generate
 agents-cli eval grade
 
-# 6. Deploy to Vertex AI Agent Runtime (us-central1) with Secret Manager bindings
+# 6. Deploy to Vertex AI Agent Runtime (us-central1) with Agent Identity & Secret Manager bindings
 agents-cli deploy \
   --project $GCP_PROJECT \
   --region us-central1 \
+  --agent-identity \
   --secrets "USER_OAUTH_CLIENT_ID=ge-it-assistant-oauth-client-id:latest,USER_OAUTH_CLIENT_SECRET=ge-it-assistant-oauth-client-secret:latest,USER_OAUTH_REFRESH_TOKEN=ge-it-assistant-oauth-refresh-token:latest"
 
 # 7. Register / Publish to Gemini Enterprise

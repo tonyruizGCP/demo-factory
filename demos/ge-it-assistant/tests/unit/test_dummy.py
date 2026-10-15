@@ -22,6 +22,8 @@ from app.tools import (
     _adf_to_text,
     _extract_access_token,
     _parse_discovery_results,
+    _retrieve_token_from_auth_manager,
+    get_gcp_auth_provider_scheme,
     search_datastore_records,
 )
 
@@ -48,7 +50,9 @@ def test_extract_access_token_from_tool_context() -> None:
         == "mock_token_mock_ge_user_token_1234567890"
     )
     temp_ctx = SimpleNamespace(
-        state={"temp:it_assistant_oauth_token": "mock_token_temp_ge_user_token_1234567890"}
+        state={
+            "temp:it_assistant_oauth_token": "mock_token_temp_ge_user_token_1234567890"
+        }
     )
     assert (
         _extract_access_token(temp_ctx)  # type: ignore[arg-type]
@@ -147,3 +151,45 @@ def test_search_datastore_records_blueprint_tool(
     assert out["status"] == "success"
     assert out["total_results"] == 1
     assert out["results"][0]["title"] == "GC5060 Pipeline Resolution Plan"
+
+
+@patch("app.tools.requests.post")
+@patch("app.tools.google.auth.default")
+def test_agent_identity_auth_manager_credential_retrieval(
+    mock_auth_default: MagicMock,
+    mock_post: MagicMock,
+    monkeypatch,
+) -> None:
+    """Verifies ADK 2.0 GcpAuthProviderScheme and Agent Identity Auth Manager token retrieval."""
+    monkeypatch.setenv(
+        "GCP_AUTH_PROVIDER_NAME",
+        "projects/acme-enterprise-demo/locations/us-central1/authProviders/ge-it-assistant-oauth",
+    )
+    scheme = get_gcp_auth_provider_scheme()
+    assert (
+        scheme.name
+        == "projects/acme-enterprise-demo/locations/us-central1/authProviders/ge-it-assistant-oauth"
+    )
+    assert scheme.scopes == ["https://www.googleapis.com/auth/cloud-platform"]
+
+    mock_creds = MagicMock()
+    mock_creds.token = "mock_spiffe_workload_token"
+    mock_auth_default.return_value = (mock_creds, "acme-enterprise-demo")
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {
+        "success": {
+            "token": "mock_token_from_agent_identity_auth_manager",
+            "header": "Authorization: Bearer",
+        }
+    }
+    mock_post.return_value = mock_resp
+
+    mock_ctx = SimpleNamespace(user_id="engineer@acme-co.example.com", state={})
+    token = _retrieve_token_from_auth_manager(mock_ctx)  # type: ignore[arg-type]
+    assert token == "mock_token_from_agent_identity_auth_manager"
+    assert (
+        _extract_access_token(mock_ctx)  # type: ignore[arg-type]
+        == "mock_token_from_agent_identity_auth_manager"
+    )

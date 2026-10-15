@@ -37,12 +37,24 @@ import google.auth
 import google.auth.transport.requests
 import requests
 from dotenv import load_dotenv
+from google.adk.auth.auth_schemes import CustomAuthScheme
 from google.adk.tools import ToolContext
 from google.oauth2.credentials import Credentials
+from pydantic import Field
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+
+class GcpAuthProviderScheme(CustomAuthScheme):
+    """ADK 2.0 Agent Identity Auth Manager authentication scheme (`gcpAuthProviderScheme`)."""
+
+    type_: str = Field(default="gcpAuthProviderScheme", alias="type")
+    name: str
+    scopes: list[str] | None = None
+    continue_uri: str | None = None
+
 
 # Default configuration for Acme Co. Gemini Enterprise IT Assistant Demo
 DEFAULT_PROJECT_ID = "acme-enterprise-demo"
@@ -50,6 +62,8 @@ DEFAULT_PROJECT_NUMBER = "123456789012"
 DEFAULT_LOCATION = "global"
 DEFAULT_GE_APP_ID = "acme_ge_app"
 DEFAULT_AUTH_NAME = "it_assistant_oauth_token"
+DEFAULT_AUTH_PROVIDER_NAME = "projects/acme-enterprise-demo/locations/us-central1/authProviders/ge-it-assistant-oauth"
+DEFAULT_CONTINUE_URI = "https://vertexaisearch.cloud.google.com"
 
 DEFAULT_GDRIVE_DS = "acme-gdrive-ds_google_drive"
 DEFAULT_GNOTEBOOK_DS = "acme-gnotebook-ds"
@@ -84,8 +98,86 @@ def _get_location() -> str:
     return os.getenv("DISCOVERY_ENGINE_LOCATION") or DEFAULT_LOCATION
 
 
+def get_gcp_auth_provider_scheme() -> GcpAuthProviderScheme:
+    """Returns the ADK 2.0 GcpAuthProviderScheme for Agent Identity Auth Manager."""
+    provider_name = os.getenv("GCP_AUTH_PROVIDER_NAME") or DEFAULT_AUTH_PROVIDER_NAME
+    continue_uri = os.getenv("GCP_AUTH_CONTINUE_URI") or DEFAULT_CONTINUE_URI
+    return GcpAuthProviderScheme(
+        name=provider_name,
+        scopes=["https://www.googleapis.com/auth/cloud-platform"],
+        continue_uri=continue_uri,
+    )
+
+
+def _retrieve_token_from_auth_manager(
+    tool_context: ToolContext | None = None,
+) -> str | None:
+    """Retrieves an ephemeral end-user OAuth token via Agent Identity Auth Manager.
+
+    Calls `https://agentidentitycredentials.googleapis.com/v1/{auth_provider}/credentials:retrieve`
+    using the agent's workload identity (SPIFFE ID `principal://agents.global.org-...`
+    with `roles/agentidentity.user`). This avoids persisting raw user OAuth tokens in
+    `tool_context.state` when the user has already granted consent to the AuthProvider.
+    """
+    auth_provider = os.getenv("GCP_AUTH_PROVIDER_NAME")
+    if not auth_provider:
+        return None
+
+    user_id = os.getenv("DEFAULT_AUTH_USER_ID") or "admin@acme-co.example.com"
+    if tool_context is not None:
+        ctx_user_id = getattr(tool_context, "user_id", None)
+        if isinstance(ctx_user_id, str) and ctx_user_id.strip():
+            user_id = ctx_user_id.strip()
+
+    try:
+        creds, _ = google.auth.default()
+        auth_req = google.auth.transport.requests.Request()
+        creds.refresh(auth_req)
+        if not creds.token:
+            return None
+
+        scheme = get_gcp_auth_provider_scheme()
+        url = f"https://agentidentitycredentials.googleapis.com/v1/{scheme.name}/credentials:retrieve"
+        resp = requests.post(
+            url,
+            headers={
+                "Authorization": f"Bearer {creds.token}",
+                "Content-Type": "application/json",
+                "X-Goog-User-Project": _get_project_id(),
+            },
+            json={
+                "userId": user_id,
+                "scopes": scheme.scopes
+                or ["https://www.googleapis.com/auth/cloud-platform"],
+                "continueUri": scheme.continue_uri or DEFAULT_CONTINUE_URI,
+            },
+            timeout=10,
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            success = data.get("success") or {}
+            token = success.get("token")
+            if isinstance(token, str) and token.strip():
+                return token.strip()
+            if "uriConsentRequired" in data:
+                logger.info(
+                    "Agent Identity Auth Manager requires initial 3LO consent for user %s at %s",
+                    user_id,
+                    data["uriConsentRequired"].get("authorizationUri"),
+                )
+    except Exception as e:
+        logger.debug("Agent Identity Auth Manager lookup skipped/fallback: %s", e)
+    return None
+
+
 def _extract_access_token(tool_context: ToolContext | None) -> str | None:
-    """Extracts the OAuth access token from ADK ToolContext state per the blueprint."""
+    """Extracts the OAuth access token via Agent Identity Auth Manager or ADK ToolContext state."""
+    # Tier 1: Agent Identity Auth Manager (zero state token exposure when consented)
+    broker_token = _retrieve_token_from_auth_manager(tool_context)
+    if broker_token:
+        return broker_token
+
+    # Tier 2: Gemini Enterprise OAuth token passed in ADK ToolContext state
     if tool_context is None or not hasattr(tool_context, "state"):
         return None
     auth_name = os.getenv("AUTH_NAME") or DEFAULT_AUTH_NAME
