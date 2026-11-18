@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpenMARCIE Vol10 × Gemini 4 Hydrogen</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.14);
+      --text: #eef2ff;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-2: #818cf8;
+      --ok: #34d399;
+      --warn: #fbbf24;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 15% 10%, #1e293b 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(12px);
+    }
+    .title h1 { margin: 0; font-size: 1.25rem; }
+    .title p { margin: 4px 0 0; color: var(--muted); font-size: 0.88rem; }
+    .badge {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      border: 1px solid var(--border);
+      background: var(--panel);
+    }
+    main {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      backdrop-filter: blur(14px);
+    }
+    video {
+      width: 100%;
+      border-radius: 12px;
+      background: #000;
+      border: 1px solid var(--border);
+    }
+    .keyframes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .kf {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .kf img { width: 100%; border-radius: 6px; display: block; margin-bottom: 4px; }
+    .controls { display: flex; flex-direction: column; gap: 12px; }
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .mode-btn {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.84rem;
+      text-align: left;
+    }
+    .mode-btn.active {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.14);
+    }
+    .row { display: flex; gap: 10px; align-items: center; }
+    select, textarea {
+      width: 100%;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px;
+      font: inherit;
+      font-size: 0.9rem;
+    }
+    button.primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #07101e;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 18px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button.primary:disabled { opacity: 0.6; cursor: wait; }
+    details {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.25);
+    }
+    summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 0.84rem;
+      line-height: 1.45;
+      margin: 10px 0 0;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.84rem; }
+    th, td { border-bottom: 1px solid var(--border); padding: 8px 6px; text-align: left; vertical-align: top; }
+    th { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">
+      <h1>OpenMARCIE (Vol10) × Gemini 4 Hydrogen</h1>
+      <p>Selective 618 KB subset from the 197 GB industrial multimodal dataset</p>
+    </div>
+    <div class="badge" id="statusBadge">Checking backend…</div>
+  </header>
+
+  <main>
+    <section class="card">
+      <video id="videoPlayer" controls preload="metadata">
+        <source src="/static/media/vol10_window_90s_cropped.mp4" type="video/mp4" />
+      </video>
+      <div class="keyframes" id="keyframesGrid"></div>
+    </section>
+
+    <section class="card controls">
+      <div class="mode-grid">
+        <button class="mode-btn active" data-mode="temporal_actions">
+          <strong>1. Temporal Actions</strong><br><span style="color:var(--muted)">Video → JSON</span>
+        </button>
+        <button class="mode-btn" data-mode="spatial_transitions">
+          <strong>2. Spatial Keyframes</strong><br><span style="color:var(--muted)">3 Frames → Diff</span>
+        </button>
+        <button class="mode-btn" data-mode="ehs_audit">
+          <strong>3. EHS &amp; SOP Audit</strong><br><span style="color:var(--muted)">Video → Report</span>
+        </button>
+      </div>
+
+      <textarea id="promptInput" rows="2" placeholder="Optional custom prompt override (leave blank for default)..."></textarea>
+
+      <div class="row">
+        <label style="font-size:0.85rem;color:var(--muted)">Thinking:</label>
+        <select id="thinkingLevel">
+          <option value="LOW">LOW</option>
+          <option value="MEDIUM" selected>MEDIUM</option>
+          <option value="HIGH">HIGH</option>
+          <option value="XHIGH">XHIGH</option>
+        </select>
+        <button class="primary" id="runBtn">Run Gemini 4 Hydrogen</button>
+      </div>
+
+      <div id="metaLine" style="font-size:0.8rem;color:var(--muted)"></div>
+      <details id="thoughtsBox" style="display:none">
+        <summary>Model Thinking Trace</summary>
+        <pre id="thoughtsText"></pre>
+      </details>
+      <div id="outputArea"><p style="color:var(--muted)">Select a mode and click <strong>Run Gemini 4 Hydrogen</strong>.</p></div>
+    </section>
+  </main>
+
+  <script>
+    let currentMode = "temporal_actions";
+    const modeBtns = document.querySelectorAll(".mode-btn");
+    modeBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        modeBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentMode = btn.dataset.mode;
+      });
+    });
+
+    async function init() {
+      const [h, m] = await Promise.all([
+        fetch("/api/health").then(r => r.json()),
+        fetch("/api/media").then(r => r.json())
+      ]);
+      const badge = document.getElementById("statusBadge");
+      badge.textContent = `${h.model} • ${h.location} (${h.simulation_forced ? "Simulated" : "Live/Fallback"})`;
+
+      const grid = document.getElementById("keyframesGrid");
+      grid.innerHTML = m.keyframes.map(k =>
+        `<div class="kf"><img src="${k.url}" alt="${k.label}" /><span>${k.label}</span></div>`
+      ).join("");
+    }
+
+    document.getElementById("runBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("runBtn");
+      btn.disabled = true;
+      btn.textContent = "Analyzing…";
+      try {
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            mode: currentMode,
+            prompt: document.getElementById("promptInput").value,
+            thinking_level: document.getElementById("thinkingLevel").value
+          })
+        }).then(r => r.json());
+
+        const meta = [`Model: ${res.model}`, `Thinking: ${res.thinking_level}`];
+        if (res.elapsed_sec) meta.push(`${res.elapsed_sec}s`);
+        if (res.fallback_reason) meta.push("Offline fallback active");
+        document.getElementById("metaLine").textContent = meta.join(" • ");
+
+        const tb = document.getElementById("thoughtsBox");
+        if (res.thoughts) {
+          tb.style.display = "block";
+          document.getElementById("thoughtsText").textContent = res.thoughts;
+        } else {
+          tb.style.display = "none";
+        }
+
+        const out = document.getElementById("outputArea");
+        if (currentMode === "temporal_actions" && res.result && res.result.segments) {
+          const rows = res.result.segments.map(s =>
+            `<tr><td>${s.start_time}–${s.end_time}</td><td><strong>${s.action_label}</strong><br><span style="color:var(--muted)">${s.visual_evidence}</span></td><td>${(s.components_or_tools || []).join(", ")}</td><td>${s.worker_posture}</td></tr>`
+          ).join("");
+          out.innerHTML = `<p>${res.result.scene_summary}</p><table><thead><tr><th>Time</th><th>Action</th><th>Parts/Tools</th><th>Posture</th></tr></thead><tbody>${rows}</tbody></table>`;
+        } else {
+          out.innerHTML = `<pre>${typeof res.result === "string" ? res.result : JSON.stringify(res.result, null, 2)}</pre>`;
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Run Gemini 4 Hydrogen";
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
