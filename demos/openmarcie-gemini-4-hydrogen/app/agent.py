@@ -38,6 +38,8 @@ def _build_client() -> genai.Client:
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if api_key:
         return genai.Client(api_key=api_key)
+    if not GCP_PROJECT:
+        raise RuntimeError("Set GCP_PROJECT (or GEMINI_API_KEY) for live Vertex AI calls.")
     return genai.Client(vertexai=True, project=GCP_PROJECT, location=GCP_LOCATION)
 
 

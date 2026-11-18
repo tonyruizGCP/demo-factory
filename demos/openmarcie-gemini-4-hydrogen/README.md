@@ -10,7 +10,7 @@ make test
 make eval
 
 # 2. Launch the web UI (uses live Vertex AI if authenticated, or simulated fallback)
-export GCP_PROJECT=truiz-agent-gov-cli-demo
+export GCP_PROJECT=<your-gcp-project-id>
 make run
 ```
 

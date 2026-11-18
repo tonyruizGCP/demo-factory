@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from google.genai import types
-from gemini_client import get_client
+from gemini_client import MODEL_ID, get_client
 
 
 def main() -> None:
@@ -28,9 +28,11 @@ def main() -> None:
 
     client = get_client()
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model=MODEL_ID,
         contents=contents,
-        config=types.GenerateContentConfig(temperature=0.2),
+        config=types.GenerateContentConfig(
+            thinking_config=types.ThinkingConfig(thinking_level="MEDIUM", include_thoughts=True),
+        ),
     )
 
     print("=== Demo 2: Multi-Frame Spatial & State-Transition Reasoning ===")

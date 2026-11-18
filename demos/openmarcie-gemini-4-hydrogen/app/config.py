@@ -15,7 +15,7 @@ KEYFRAMES = [
 ]
 
 # Demo Factory guardrail: use GCP_PROJECT env var in app/
-GCP_PROJECT = os.environ.get("GCP_PROJECT", "truiz-agent-gov-cli-demo")
+GCP_PROJECT = os.environ.get("GCP_PROJECT", "")
 GCP_LOCATION = os.environ.get("GCP_LOCATION", "global")
 MODEL_ID = os.environ.get("GEMINI_MODEL", "gemini-4-hydrogen")
 FORCE_SIMULATION = os.environ.get("DEMO_SIMULATION", "0") == "1"

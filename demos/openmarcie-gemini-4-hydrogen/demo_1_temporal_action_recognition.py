@@ -3,7 +3,7 @@
 from pathlib import Path
 from pydantic import BaseModel, Field
 from google.genai import types
-from gemini_client import get_client
+from gemini_client import MODEL_ID, get_client
 
 
 class ActionSegment(BaseModel):
@@ -34,7 +34,7 @@ def main() -> None:
     )
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model=MODEL_ID,
         contents=[
             types.Part.from_bytes(data=video_bytes, mime_type="video/mp4"),
             prompt,
@@ -42,7 +42,7 @@ def main() -> None:
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=AssemblyTimeline,
-            temperature=0.2,
+            thinking_config=types.ThinkingConfig(thinking_level="MEDIUM", include_thoughts=True),
         ),
     )
 
